@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS หน้าร้าน — บ้านกันแสง</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#2D6A4F;--green-l:#52B788;--green-p:#D8F3DC;
+  --gold:#B7881A;--red:#C62828;--red-p:#FFEBEE;
+  --text:#1B2D1B;--text2:#4A6741;--text3:#7D9B78;
+  --bg:#F0F4F0;--white:#FFFFFF;--border:#DDE8DC;
+  --font:'Sarabun',sans-serif;--r:10px;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* TOP BAR */
+.topbar{background:var(--green);color:white;padding:.6rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-shrink:0}
+.topbar a{color:rgba(255,255,255,.7);text-decoration:none;font-size:.85rem}
+.topbar a:hover{color:white}
+.topbar h1{font-size:1rem;font-weight:700;flex:1}
+.topbar .time{font-size:.85rem;opacity:.8;font-weight:300}
+.badge{background:rgba(255,255,255,.2);padding:.25rem .75rem;border-radius:20px;font-size:.8rem;font-weight:600}
+
+/* LAYOUT */
+.pos-layout{display:grid;grid-template-columns:1fr 360px;gap:0;flex:1;overflow:hidden}
+
+/* LEFT: PRODUCTS */
+.products-panel{display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+.search-bar{padding:1rem;background:var(--white);border-bottom:1px solid var(--border);display:flex;gap:.75rem}
+.search-bar input{flex:1;padding:.65rem 1rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.95rem;outline:none;transition:.2s}
+.search-bar input:focus{border-color:var(--green)}
+.cat-bar{padding:.6rem 1rem;display:flex;gap:.5rem;overflow-x:auto;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+.cat-bar::-webkit-scrollbar{height:3px}
+.cat-btn{padding:.35rem .9rem;border-radius:20px;border:1.5px solid var(--border);background:transparent;font-family:var(--font);font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:.2s;color:var(--text2)}
+.cat-btn.active{background:var(--green);color:white;border-color:var(--green)}
+.cat-btn:hover:not(.active){background:var(--green-p);border-color:var(--green)}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1rem;padding:1rem;overflow-y:auto;flex:1;align-content:start}
+.product-card{background:var(--white);border-radius:var(--r);padding:1rem;cursor:pointer;border:2px solid transparent;transition:.15s;text-align:center;position:relative}
+.product-card:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 4px 16px rgba(45,106,79,.15)}
+.product-card.out{opacity:.5;cursor:not-allowed}
+.product-card .emoji{font-size:2.2rem;display:block;margin-bottom:.5rem}
+.product-card .pname{font-size:.8rem;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:.3rem}
+.product-card .price{font-size:1rem;font-weight:700;color:var(--green)}
+.product-card .stock{font-size:.7rem;color:var(--text3)}
+.product-card .stock.low{color:var(--red);font-weight:600}
+.out-badge{position:absolute;top:6px;right:6px;background:var(--red);color:white;font-size:.65rem;font-weight:700;padding:.2rem .5rem;border-radius:6px}
+
+/* RIGHT: CART */
+.cart-panel{background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.cart-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.cart-header h2{font-size:1rem;font-weight:700}
+.btn-clear{background:none;border:1px solid var(--border);border-radius:8px;padding:.3rem .75rem;font-size:.8rem;color:var(--red);cursor:pointer;font-family:var(--font);font-weight:600}
+.btn-clear:hover{background:var(--red-p)}
+.cart-items{flex:1;overflow-y:auto;padding:.75rem}
+.cart-empty{text-align:center;color:var(--text3);padding:3rem 1rem;font-size:.9rem}
+.cart-empty .ce-icon{font-size:3rem;display:block;margin-bottom:.5rem}
+.cart-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .5rem;border-radius:var(--r);transition:.15s;border-bottom:1px solid #F0F4F0}
+.cart-item:hover{background:#F8FAF8}
+.ci-emoji{font-size:1.5rem;width:36px;text-align:center;flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.ci-name{font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-price{font-size:.78rem;color:var(--text2)}
+.ci-qty{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.qty-btn{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--border);background:none;cursor:pointer;font-size:1rem;font-weight:700;color:var(--green);display:flex;align-items:center;justify-content:center;transition:.15s}
+.qty-btn:hover{background:var(--green-p);border-color:var(--green)}
+.ci-qty span{font-size:.9rem;font-weight:700;min-width:20px;text-align:center}
+.ci-subtotal{font-size:.85rem;font-weight:700;color:var(--green);min-width:56px;text-align:right;flex-shrink:0}
+
+/* SUMMARY */
+.cart-summary{padding:1rem 1.25rem;border-top:1px solid var(--border)}
+.sum-row{display:flex;justify-content:space-between;font-size:.875rem;margin-bottom:.4rem;color:var(--text2)}
+.sum-total{display:flex;justify-content:space-between;font-size:1.2rem;font-weight:700;color:var(--green);margin:.75rem 0}
+.payment-btns{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem}
+.pay-btn{padding:.65rem;border-radius:var(--r);border:2px solid var(--border);background:white;cursor:pointer;font-family:var(--font);font-size:.8rem;font-weight:700;color:var(--text2);transition:.15s}
+.pay-btn.active{border-color:var(--green);background:var(--green-p);color:var(--green)}
+.btn-checkout{width:100%;padding:.9rem;background:var(--green);color:white;border:none;border-radius:var(--r);font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn-checkout:hover{background:#235C41}
+.btn-checkout:disabled{background:var(--border);color:var(--text3);cursor:not-allowed}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:white;border-radius:16px;padding:2rem;max-width:420px;width:90%;text-align:center}
+.modal h2{font-family:'Noto Serif Thai',serif;font-size:1.5rem;color:var(--green);margin-bottom:.5rem}
+.modal .amount{font-size:2.5rem;font-weight:700;color:var(--text);margin:1rem 0}
+.modal .qr-box{background:var(--bg);border-radius:var(--r);padding:1.5rem;margin:1rem 0;font-size:.9rem;color:var(--text2)}
+.modal-btns{display:flex;gap:.75rem;margin-top:1.25rem}
+.modal-btns button{flex:1;padding:.75rem;border-radius:var(--r);border:none;font-family:var(--font);font-size:.9rem;font-weight:700;cursor:pointer}
+.btn-confirm{background:var(--green);color:white}
+.btn-cancel{background:var(--bg);color:var(--text2)}
+
+/* RECEIPT */
+.receipt{font-family:'Courier New',monospace;font-size:.8rem;text-align:left;background:#FFF;padding:1rem;border-radius:8px;border:1px dashed var(--border);margin-top:1rem;max-height:300px;overflow-y:auto;line-height:1.6}
+
+/* ALERT */
+.alert{position:fixed;top:80px;right:1.5rem;background:var(--green);color:white;padding:.75rem 1.5rem;border-radius:var(--r);font-weight:600;font-size:.875rem;z-index:300;animation:slideIn .3s ease;display:none}
+.alert.show{display:block}
+.alert.error{background:var(--red)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html">← หน้าหลัก</a>
+  <h1>🏪 POS — หน้าร้าน</h1>
+  <span class="time" id="clock"></span>
+  <span class="badge" id="today-stat">วันนี้: ฿0</span>
+</div>
+
+<div class="pos-layout">
+  <!-- LEFT: Products -->
+  <div class="products-panel">
+    <div class="search-bar">
+      <input type="text" id="search" placeholder="ค้นหาสินค้า พิมพ์ชื่อ หรือ บาร์โค้ด..." autocomplete="off">
+    </div>
+    <div class="cat-bar" id="cat-bar"></div>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+
+  <!-- RIGHT: Cart -->
+  <div class="cart-panel">
+    <div class="cart-header">
+      <h2>🛒 ตะกร้า</h2>
+      <button class="btn-clear" onclick="clearCart()">ล้างตะกร้า</button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <div class="cart-empty"><span class="ce-icon">🛍️</span>กดเลือกสินค้าเพื่อเพิ่มลงตะกร้า</div>
+    </div>
+    <div class="cart-summary">
+      <div class="sum-row"><span>รายการ</span><span id="sum-count">0 รายการ</span></div>
+      <div class="sum-row"><span>ส่วนลด</span><span>฿0</span></div>
+      <div class="sum-total"><span>รวมทั้งหมด</span><span id="sum-total">฿0</span></div>
+      <div class="payment-btns">
+        <button class="pay-btn active" onclick="setPayment('cash')" id="pay-cash">💵 เงินสด</button>
+        <button class="pay-btn" onclick="setPayment('qr')" id="pay-qr">📱 QR/โอน</button>
+        <button class="pay-btn" onclick="setPayment('card')" id="pay-card">💳 บัตร</button>
+        <button class="pay-btn" onclick="setPayment('credit')" id="pay-credit">📝 เชื่อ</button>
+      </div>
+      <button class="btn-checkout" onclick="checkout()" id="btn-checkout" disabled>ชำระเงิน →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal">
+    <h2 id="modal-title">รับชำระเงิน</h2>
+    <div class="amount" id="modal-amount"></div>
+    <div id="modal-content"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-confirm" onclick="confirmPayment()">✓ ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receipt-modal">
+  <div class="modal">
+    <h2>✅ ชำระเงินสำเร็จ</h2>
+    <div class="receipt" id="receipt-content"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeReceipt()">ปิด</button>
+      <button class="btn-confirm" onclick="printReceipt()">🖨️ พิมพ์</button>
+    </div>
+  </div>
+</div>
+
+<div class="alert" id="alert"></div>
+
+<script src="js/store.js"></script>
+<script>
+let cart = [];
+let currentCat = 'ทั้งหมด';
+let paymentMethod = 'cash';
+let currentOrder = null;
+
+// CLOCK
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('th-TH');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// UPDATE TODAY STAT
+function updateTodayStat() {
+  const s = getTodayStats();
+  document.getElementById('today-stat').textContent = `วันนี้: ${formatMoney(s.revenue)} (${s.orders} บิล)`;
+}
+updateTodayStat();
+
+// RENDER CATEGORIES
+function renderCategories() {
+  const cats = ['ทั้งหมด', ...getCategories()];
+  const bar = document.getElementById('cat-bar');
+  bar.innerHTML = cats.map(c =>
+    `<button class="cat-btn ${c === currentCat ? 'active' : ''}" onclick="filterCat('${c}')">${c}</button>`
+  ).join('');
+}
+
+// FILTER CATEGORY
+function filterCat(cat) {
+  currentCat = cat;
+  renderCategories();
+  renderProducts();
+}
+
+// RENDER PRODUCTS
+function renderProducts(query = '') {
+  let products = getProducts(true);
+  if (currentCat !== 'ทั้งหมด') products = products.filter(p => p.category === currentCat);
+  if (query) {
+    const q = query.toLowerCase();
+    products = products.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      (p.barcode && p.barcode.includes(q))
+    );
+  }
+  const grid = document.getElementById('products-grid');
+  if (!products.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#7D9B78;padding:2rem">ไม่พบสินค้า</div>';
+    return;
+  }
+  grid.innerHTML = products.map(p => {
+    const out = p.stock <= 0;
+    const low = p.stock <= p.minStock && p.stock > 0;
+    return `<div class="product-card ${out ? 'out' : ''}" onclick="${out ? '' : `addToCart('${p.id}')`}">
+      ${out ? '<span class="out-badge">หมด</span>' : ''}
+      <span class="emoji">${p.image}</span>
+      <div class="pname">${p.name}</div>
+      <div class="price">${formatMoney(p.price)}</div>
+      <div class="stock ${low ? 'low' : ''}">คงเหลือ: ${p.stock} ${p.unit}</div>
+    </div>`;
+  }).join('');
+}
+
+// SEARCH
+document.getElementById('search').addEventListener('input', e => {
+  renderProducts(e.target.value);
+});
+
+// ADD TO CART
+function addToCart(id) {
+  const p = getProduct(id);
+  if (!p || p.stock <= 0) return;
+  const existing = cart.find(c => c.id === id);
+  if (existing) {
+    if (existing.qty >= p.stock) { showAlert('สต็อกไม่เพียงพอ', true); return; }
+    existing.qty++;
+  } else {
+    cart.push({ id: p.id, name: p.name, price: p.price, cost: p.cost, emoji: p.image, unit: p.unit, qty: 1 });
+  }
+  renderCart();
+}
+
+// RENDER CART
+function renderCart() {
+  const container = document.getElementById('cart-items');
+  if (!cart.length) {
+    container.innerHTML = '<div class="cart-empty"><span class="ce-icon">🛍️</span>กดเลือกสินค้าเพื่อเพิ่มลงตะกร้า</div>';
+    updateSummary();
+    return;
+  }
+  container.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <span class="ci-emoji">${item.emoji}</span>
+      <div class="ci-info">
+        <div class="ci-name">${item.name}</div>
+        <div class="ci-price">${formatMoney(item.price)} / ${item.unit}</div>
+      </div>
+      <div class="ci-qty">
+        <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+        <span>${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+      </div>
+      <div class="ci-subtotal">${formatMoney(item.price * item.qty)}</div>
+    </div>
+  `).join('');
+  updateSummary();
+}
+
+// CHANGE QTY
+function changeQty(id, delta) {
+  const idx = cart.findIndex(c => c.id === id);
+  if (idx < 0) return;
+  cart[idx].qty += delta;
+  if (cart[idx].qty <= 0) cart.splice(idx, 1);
+  renderCart();
+}
+
+// CLEAR CART
+function clearCart() {
+  if (cart.length && !confirm('ล้างตะกร้าทั้งหมด?')) return;
+  cart = [];
+  renderCart();
+}
+
+// UPDATE SUMMARY
+function updateSummary() {
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  document.getElementById('sum-count').textContent = cart.length + ' รายการ';
+  document.getElementById('sum-total').textContent = formatMoney(total);
+  document.getElementById('btn-checkout').disabled = !cart.length;
+}
+
+// PAYMENT METHOD
+function setPayment(method) {
+  paymentMethod = method;
+  ['cash', 'qr', 'card', 'credit'].forEach(m => {
+    document.getElementById('pay-' + m).classList.toggle('active', m === method);
+  });
+}
+
+// CHECKOUT
+function checkout() {
+  if (!cart.length) return;
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  document.getElementById('modal-title').textContent =
+    paymentMethod === 'cash' ? '💵 รับชำระเงินสด' :
+    paymentMethod === 'qr' ? '📱 QR / โอนเงิน' :
+    paymentMethod === 'card' ? '💳 บัตรเดบิต/เครดิต' : '📝 ขายเชื่อ';
+  document.getElementById('modal-amount').textContent = formatMoney(total);
+  const settings = getSettings();
+  let content = '';
+  if (paymentMethod === 'qr') {
+    content = `<div class="qr-box">
+      <div style="font-size:3rem;margin-bottom:.5rem">📱</div>
+      <strong>พร้อมเพย์: ${settings.promptpay}</strong><br>
+      <span style="color:#4A6741">${settings.shopName}</span><br>
+      <strong style="color:#2D6A4F;font-size:1.1rem">฿${total.toLocaleString()}</strong>
+      <div style="margin-top:.5rem;font-size:.75rem;color:#7D9B78">กรุณาโอนและกดยืนยันเมื่อโอนแล้ว</div>
+    </div>`;
+  } else if (paymentMethod === 'cash') {
+    content = `<div class="qr-box">
+      <input type="number" id="cash-received" placeholder="จำนวนเงินที่รับ" 
+        style="width:100%;padding:.65rem;border:1.5px solid #DDE8DC;border-radius:8px;font-size:1.1rem;text-align:center;font-family:'Sarabun',sans-serif;outline:none;margin-bottom:.5rem" 
+        oninput="calcChange(${total})" value="${total}">
+      <div id="change-display" style="font-size:1rem;color:#2D6A4F;font-weight:700">ทอน: ฿0</div>
+    </div>`;
+  } else {
+    content = `<div class="qr-box">กดยืนยันเพื่อบันทึกการขาย</div>`;
+  }
+  document.getElementById('modal-content').innerHTML = content;
+  document.getElementById('payment-modal').classList.add('show');
+}
+
+function calcChange(total) {
+  const received = parseFloat(document.getElementById('cash-received').value) || 0;
+  const change = received - total;
+  document.getElementById('change-display').textContent =
+    change >= 0 ? `ทอน: ${formatMoney(change)}` : `ไม่เพียงพอ: ${formatMoney(Math.abs(change))}`;
+}
+
+function closeModal() {
+  document.getElementById('payment-modal').classList.remove('show');
+}
+
+// CONFIRM PAYMENT
+function confirmPayment() {
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const profit = cart.reduce((s, i) => s + (i.price - i.cost) * i.qty, 0);
+
+  // Deduct stock
+  const result = deductStock(cart.map(i => ({ id: i.id, qty: i.qty })));
+  if (!result.ok) {
+    showAlert(result.errors.join(', '), true);
+    return;
+  }
+
+  // Save order
+  const order = addOrder({
+    items: [...cart],
+    total,
+    profit,
+    payment: paymentMethod,
+    channel: 'pos',
+    status: 'completed',
+    cashier: 'พนักงาน',
+  });
+  currentOrder = order;
+
+  closeModal();
+  showReceipt(order);
+  renderProducts(document.getElementById('search').value);
+  updateTodayStat();
+  const savedCart = [...cart];
+  cart = [];
+  renderCart();
+  showAlert('✅ ชำระเงินสำเร็จ');
+
+  // Check low stock
+  const low = getLowStock();
+  if (low.length) {
+    setTimeout(() => showAlert(`⚠️ สต็อกใกล้หมด: ${low.map(p => p.name).join(', ')}`, true), 1500);
+  }
+}
+
+// RECEIPT
+function showReceipt(order) {
+  const settings = getSettings();
+  const now = new Date();
+  let text = `================================\n`;
+  text += `  ${settings.shopName}\n`;
+  text += `  ${settings.address}\n`;
+  text += `  โทร: ${settings.phone}\n`;
+  text += `================================\n`;
+  text += `เลขที่: ${order.id}\n`;
+  text += `วันที่: ${formatDate(order.createdAt)}\n`;
+  text += `การชำระ: ${order.payment === 'cash' ? 'เงินสด' : order.payment === 'qr' ? 'QR/โอน' : 'บัตร'}\n`;
+  text += `--------------------------------\n`;
+  order.items.forEach(i => {
+    text += `${i.name}\n`;
+    text += `  ${i.qty} x ${formatMoney(i.price)} = ${formatMoney(i.price * i.qty)}\n`;
+  });
+  text += `--------------------------------\n`;
+  text += `รวม: ${formatMoney(order.total)}\n`;
+  text += `================================\n`;
+  text += `  ขอบคุณที่ใช้บริการ 🙏\n`;
+  text += `  ${settings.shopName}\n`;
+  text += `================================`;
+  document.getElementById('receipt-content').textContent = text;
+  document.getElementById('receipt-modal').classList.add('show');
+}
+
+function closeReceipt() {
+  document.getElementById('receipt-modal').classList.remove('show');
+}
+
+function printReceipt() {
+  window.print();
+}
+
+// ALERT
+function showAlert(msg, error = false) {
+  const el = document.getElementById('alert');
+  el.textContent = msg;
+  el.className = 'alert show' + (error ? ' error' : '');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// LISTEN STOCK UPDATES
+window.addEventListener('stockUpdated', () => {
+  renderProducts(document.getElementById('search').value);
+});
+
+// INIT
+renderCategories();
+renderProducts();
+</script>
+</body>
+</html>

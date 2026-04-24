@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ร้านค้าออนไลน์ — บ้านกันแสง</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#2D6A4F;--green-l:#52B788;--green-p:#D8F3DC;
+  --gold:#B7881A;--red:#C62828;--red-p:#FFEBEE;
+  --text:#1B2D1B;--text2:#4A6741;--text3:#7D9B78;
+  --bg:#F8FAF8;--white:#FFFFFF;--border:#DDE8DC;
+  --font:'Sarabun',sans-serif;--r:12px;
+  --shadow:0 4px 20px rgba(45,106,79,.1);
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text)}
+
+/* NAV */
+nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.logo{font-family:'Noto Serif Thai',serif;font-size:1.1rem;font-weight:700;color:var(--green);text-decoration:none}
+.nav-r{display:flex;align-items:center;gap:1rem}
+.cart-btn{display:flex;align-items:center;gap:.5rem;padding:.5rem 1.25rem;background:var(--green);color:white;border:none;border-radius:var(--r);font-family:var(--font);font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s}
+.cart-btn:hover{background:#235C41}
+.cart-count{background:white;color:var(--green);border-radius:50%;width:20px;height:20px;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* BANNER */
+.banner{background:var(--green);color:white;padding:3rem 2rem;text-align:center}
+.banner h1{font-family:'Noto Serif Thai',serif;font-size:clamp(1.5rem,4vw,2.5rem);margin-bottom:.5rem}
+.banner p{opacity:.85;font-size:1rem;margin-bottom:1.5rem}
+.banner-pills{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+.bpill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:.35rem 1rem;border-radius:20px;font-size:.8rem}
+
+/* CONTENT */
+.content{max-width:1200px;margin:0 auto;padding:2rem}
+.filter-bar{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;margin-bottom:1.5rem}
+.filter-bar input{flex:1;min-width:200px;padding:.6rem 1rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none;transition:.2s}
+.filter-bar input:focus{border-color:var(--green)}
+.cat-pills{display:flex;gap:.5rem;flex-wrap:wrap}
+.cpill{padding:.4rem .9rem;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--text2);transition:.2s;font-family:var(--font)}
+.cpill.active{background:var(--green);color:white;border-color:var(--green)}
+
+/* PRODUCTS */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem}
+.p-card{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border);transition:.2s;display:flex;flex-direction:column}
+.p-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(45,106,79,.18)}
+.p-img{height:140px;display:flex;align-items:center;justify-content:center;font-size:4rem;background:linear-gradient(135deg,#F0F8F0,#E8F5E0)}
+.p-body{padding:1rem;flex:1;display:flex;flex-direction:column}
+.p-cat{font-size:.7rem;color:var(--green-l);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem}
+.p-name{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.25rem;line-height:1.3}
+.p-price{font-size:1.15rem;font-weight:700;color:var(--green);margin-bottom:.25rem}
+.p-stock{font-size:.75rem;color:var(--text3);margin-bottom:.75rem}
+.p-stock.low{color:#E65100;font-weight:600}
+.p-stock.out{color:var(--red);font-weight:600}
+.btn-add{width:100%;padding:.6rem;border:none;border-radius:var(--r);font-family:var(--font);font-size:.875rem;font-weight:700;cursor:pointer;transition:.2s;margin-top:auto}
+.btn-add-active{background:var(--green);color:white}
+.btn-add-active:hover{background:#235C41}
+.btn-add-disabled{background:var(--border);color:var(--text3);cursor:not-allowed}
+
+/* CART SIDEBAR */
+.cart-sidebar{position:fixed;top:0;right:-420px;width:420px;height:100vh;background:var(--white);box-shadow:-4px 0 24px rgba(0,0,0,.15);z-index:200;display:flex;flex-direction:column;transition:.35s ease}
+.cart-sidebar.open{right:0}
+.cs-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.cs-header h2{font-size:1.1rem;font-weight:700}
+.close-cart{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text2);padding:.25rem}
+.cs-items{flex:1;overflow-y:auto;padding:1rem 1.5rem}
+.cs-empty{text-align:center;color:var(--text3);padding:3rem 1rem;font-size:.9rem}
+.cart-item{display:flex;gap:.75rem;align-items:center;padding:.75rem 0;border-bottom:1px solid #F0F4F0}
+.ci-emoji{font-size:1.8rem;width:40px;text-align:center}
+.ci-info{flex:1}
+.ci-name{font-size:.85rem;font-weight:700}
+.ci-price{font-size:.8rem;color:var(--text2)}
+.ci-qty{display:flex;align-items:center;gap:6px}
+.qty-btn{width:28px;height:28px;border-radius:6px;border:1.5px solid var(--border);background:none;cursor:pointer;font-size:1rem;color:var(--green);font-weight:700;display:flex;align-items:center;justify-content:center}
+.qty-btn:hover{background:var(--green-p)}
+.ci-qty span{font-size:.9rem;font-weight:700;min-width:22px;text-align:center}
+.ci-sub{font-size:.85rem;font-weight:700;color:var(--green);min-width:56px;text-align:right}
+.cs-footer{padding:1.25rem 1.5rem;border-top:1px solid var(--border)}
+.total-row{display:flex;justify-content:space-between;font-size:1.2rem;font-weight:700;color:var(--green);margin-bottom:1rem}
+.btn-order{width:100%;padding:.9rem;background:var(--green);color:white;border:none;border-radius:var(--r);font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer}
+.btn-order:hover{background:#235C41}
+.btn-order:disabled{background:var(--border);color:var(--text3);cursor:not-allowed}
+
+/* OVERLAY */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150}
+.overlay.show{display:block}
+
+/* ORDER MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.show{display:flex}
+.modal{background:white;border-radius:16px;padding:2rem;max-width:500px;width:100%;max-height:90vh;overflow-y:auto}
+.modal h2{font-family:'Noto Serif Thai',serif;font-size:1.4rem;color:var(--green);margin-bottom:1.25rem}
+.form-row{margin-bottom:1rem}
+.form-row label{display:block;font-size:.85rem;font-weight:700;color:var(--text2);margin-bottom:.35rem}
+.form-row input,.form-row textarea,.form-row select{width:100%;padding:.65rem 1rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none;transition:.2s}
+.form-row input:focus,.form-row textarea:focus{border-color:var(--green)}
+.ship-options{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.ship-opt{padding:.75rem;border:2px solid var(--border);border-radius:var(--r);cursor:pointer;text-align:center;transition:.2s;font-size:.85rem;font-weight:600;color:var(--text2)}
+.ship-opt.active{border-color:var(--green);background:var(--green-p);color:var(--green)}
+.order-summary{background:var(--bg);border-radius:var(--r);padding:1rem;margin-bottom:1rem;font-size:.875rem}
+.order-summary .or{display:flex;justify-content:space-between;margin-bottom:.35rem;color:var(--text2)}
+.order-summary .total{display:flex;justify-content:space-between;font-weight:700;font-size:1rem;color:var(--green);border-top:1px solid var(--border);padding-top:.5rem;margin-top:.5rem}
+.qr-box{background:var(--bg);border-radius:var(--r);padding:1.5rem;text-align:center;margin-bottom:1rem}
+.qr-box .qr-icon{font-size:4rem;margin-bottom:.5rem}
+.modal-btns{display:flex;gap:.75rem}
+.modal-btns button{flex:1;padding:.75rem;border-radius:var(--r);border:none;font-family:var(--font);font-size:.9rem;font-weight:700;cursor:pointer}
+.btn-confirm{background:var(--green);color:white}
+.btn-cancel{background:var(--bg);color:var(--text2)}
+
+/* SUCCESS */
+.success-banner{background:var(--green-p);border:1px solid var(--green-l);border-radius:var(--r);padding:1.5rem;text-align:center;margin:2rem 0}
+.success-banner .icon{font-size:3rem;display:block;margin-bottom:.5rem}
+.success-banner h3{color:var(--green);font-size:1.2rem;font-weight:700;margin-bottom:.5rem}
+.success-banner p{color:var(--text2);font-size:.875rem}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">🌾 บ้านกันแสง</a>
+  <div class="nav-r">
+    <a href="index.html" style="color:var(--text2);text-decoration:none;font-size:.875rem">← กลับหน้าหลัก</a>
+    <button class="cart-btn" onclick="toggleCart()">
+      🛒 ตะกร้า <span class="cart-count" id="cart-count">0</span>
+    </button>
+  </div>
+</nav>
+
+<div class="banner">
+  <h1>🌾 วิสาหกิจชุมชนบ้านกันแสง</h1>
+  <p>สินค้าชุมชนคุณภาพดี ตรงจากมือเกษตรกร</p>
+  <div class="banner-pills">
+    <span class="bpill">🌿 ออร์แกนิก</span>
+    <span class="bpill">🏠 ผลิตในชุมชน</span>
+    <span class="bpill">📦 ส่งทั่วไทย</span>
+    <span class="bpill">💚 ปลอดภัย</span>
+  </div>
+</div>
+
+<div class="content">
+  <div class="filter-bar">
+    <input type="text" id="search" placeholder="ค้นหาสินค้า..." autocomplete="off">
+    <div class="cat-pills" id="cat-pills"></div>
+  </div>
+  <div class="products-grid" id="products-grid"></div>
+</div>
+
+<!-- Cart Sidebar -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="cart-sidebar" id="cart-sidebar">
+  <div class="cs-header">
+    <h2>🛒 ตะกร้าสินค้า</h2>
+    <button class="close-cart" onclick="closeCart()">×</button>
+  </div>
+  <div class="cs-items" id="cs-items"></div>
+  <div class="cs-footer">
+    <div class="total-row"><span>รวม</span><span id="cs-total">฿0</span></div>
+    <button class="btn-order" id="btn-order" onclick="openOrderForm()" disabled>สั่งซื้อ →</button>
+  </div>
+</div>
+
+<!-- Order Form Modal -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal">
+    <h2>📝 กรอกข้อมูลการสั่งซื้อ</h2>
+    <div class="form-row">
+      <label>ชื่อ-นามสกุล *</label>
+      <input type="text" id="o-name" placeholder="กรุณากรอกชื่อ">
+    </div>
+    <div class="form-row">
+      <label>เบอร์โทรศัพท์ *</label>
+      <input type="tel" id="o-phone" placeholder="08X-XXX-XXXX">
+    </div>
+    <div class="form-row">
+      <label>วิธีรับสินค้า</label>
+      <div class="ship-options">
+        <div class="ship-opt active" onclick="setShip('delivery')" id="ship-delivery">🚚 จัดส่งถึงบ้าน</div>
+        <div class="ship-opt" onclick="setShip('pickup')" id="ship-pickup">🏪 รับเองที่ร้าน</div>
+      </div>
+    </div>
+    <div id="address-row" class="form-row">
+      <label>ที่อยู่จัดส่ง *</label>
+      <textarea id="o-address" rows="3" placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+    </div>
+    <div class="order-summary" id="order-summary"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeOrderForm()">ยกเลิก</button>
+      <button class="btn-confirm" onclick="submitOrder()">ยืนยันคำสั่งซื้อ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal">
+    <h2>💚 ชำระเงินผ่านพร้อมเพย์</h2>
+    <div class="qr-box">
+      <div class="qr-icon">📱</div>
+      <div id="pay-number" style="font-size:1.2rem;font-weight:700;color:var(--green)"></div>
+      <div style="font-size:.875rem;color:var(--text2);margin:.25rem 0">วิสาหกิจชุมชนบ้านกันแสง</div>
+      <div id="pay-amount" style="font-size:1.5rem;font-weight:700;color:var(--text);margin:.5rem 0"></div>
+      <div style="font-size:.75rem;color:var(--text3)">โอนแล้วกดยืนยัน ทีมงานจะติดต่อกลับทันที</div>
+    </div>
+    <div id="pay-orderId" style="font-size:.8rem;color:var(--text3);text-align:center;margin-bottom:1rem"></div>
+    <button class="btn-confirm" style="width:100%;padding:.9rem;border:none;border-radius:var(--r);font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;background:var(--green);color:white" onclick="confirmPayment()">✅ โอนแล้ว / ยืนยัน</button>
+  </div>
+</div>
+
+<!-- Success -->
+<div class="modal-overlay" id="success-modal">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:4rem;margin-bottom:1rem">✅</div>
+    <h2 style="margin-bottom:.5rem">สั่งซื้อสำเร็จ!</h2>
+    <p style="color:var(--text2);margin-bottom:.25rem" id="success-orderid"></p>
+    <p style="color:var(--text2);font-size:.875rem;margin-bottom:1.5rem">ทีมงานจะติดต่อยืนยันออเดอร์ภายใน 24 ชั่วโมง</p>
+    <button class="btn-confirm" style="width:100%;padding:.9rem;border:none;border-radius:var(--r);font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;background:var(--green);color:white" onclick="closeSuccess()">กลับไปช้อปต่อ</button>
+  </div>
+</div>
+
+<script src="js/store.js"></script>
+<script>
+let cart = [];
+let currentCat = 'ทั้งหมด';
+let shipMethod = 'delivery';
+let pendingOrder = null;
+
+// CATEGORIES
+function renderCats() {
+  const cats = ['ทั้งหมด', ...getCategories()];
+  document.getElementById('cat-pills').innerHTML = cats.map(c =>
+    `<button class="cpill ${c === currentCat ? 'active' : ''}" onclick="filterCat('${c}')">${c}</button>`
+  ).join('');
+}
+
+function filterCat(cat) {
+  currentCat = cat;
+  renderCats();
+  renderProducts();
+}
+
+// PRODUCTS
+function renderProducts(q = '') {
+  let prods = getProducts(true);
+  if (currentCat !== 'ทั้งหมด') prods = prods.filter(p => p.category === currentCat);
+  if (q) { const ql = q.toLowerCase(); prods = prods.filter(p => p.name.toLowerCase().includes(ql)); }
+  const grid = document.getElementById('products-grid');
+  if (!prods.length) { grid.innerHTML = '<p style="color:#7D9B78;text-align:center;padding:3rem;grid-column:1/-1">ไม่พบสินค้า</p>'; return; }
+  grid.innerHTML = prods.map(p => {
+    const out = p.stock <= 0;
+    const low = p.stock > 0 && p.stock <= p.minStock;
+    const inCart = cart.find(c => c.id === p.id);
+    return `<div class="p-card">
+      <div class="p-img">${p.image}</div>
+      <div class="p-body">
+        <div class="p-cat">${p.category}</div>
+        <div class="p-name">${p.name}</div>
+        <div class="p-price">${formatMoney(p.price)} <span style="font-size:.75rem;font-weight:400;color:var(--text3)">/ ${p.unit}</span></div>
+        <div class="p-stock ${out ? 'out' : low ? 'low' : ''}">
+          ${out ? '❌ สินค้าหมด' : low ? `⚠️ เหลือน้อย (${p.stock} ${p.unit})` : `✅ มีสินค้า (${p.stock} ${p.unit})`}
+        </div>
+        ${out
+          ? `<button class="btn-add btn-add-disabled" disabled>สินค้าหมด</button>`
+          : inCart
+          ? `<button class="btn-add btn-add-active" onclick="openCart()">✓ ในตะกร้า (${inCart.qty})</button>`
+          : `<button class="btn-add btn-add-active" onclick="addToCart('${p.id}')">+ เพิ่มลงตะกร้า</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('search').addEventListener('input', e => renderProducts(e.target.value));
+
+// CART
+function addToCart(id) {
+  const p = getProduct(id);
+  if (!p || p.stock <= 0) return;
+  const ex = cart.find(c => c.id === id);
+  if (ex) { if (ex.qty < p.stock) ex.qty++; }
+  else cart.push({ id: p.id, name: p.name, price: p.price, cost: p.cost, emoji: p.image, unit: p.unit, qty: 1 });
+  updateCartUI();
+  renderProducts(document.getElementById('search').value);
+}
+
+function changeQty(id, d) {
+  const idx = cart.findIndex(c => c.id === id);
+  if (idx < 0) return;
+  cart[idx].qty += d;
+  if (cart[idx].qty <= 0) cart.splice(idx, 1);
+  updateCartUI();
+  renderProducts(document.getElementById('search').value);
+}
+
+function updateCartUI() {
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  document.getElementById('cart-count').textContent = cart.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cs-total').textContent = formatMoney(total);
+  document.getElementById('btn-order').disabled = !cart.length;
+  const items = document.getElementById('cs-items');
+  if (!cart.length) { items.innerHTML = '<div class="cs-empty">ยังไม่มีสินค้าในตะกร้า</div>'; return; }
+  items.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="ci-emoji">${item.emoji}</div>
+      <div class="ci-info"><div class="ci-name">${item.name}</div><div class="ci-price">${formatMoney(item.price)} / ${item.unit}</div></div>
+      <div class="ci-qty">
+        <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+        <span>${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+      </div>
+      <div class="ci-sub">${formatMoney(item.price * item.qty)}</div>
+    </div>`).join('');
+}
+
+function toggleCart() {
+  document.getElementById('cart-sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function openCart() {
+  document.getElementById('cart-sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeCart() {
+  document.getElementById('cart-sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ORDER FORM
+function openOrderForm() {
+  closeCart();
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  document.getElementById('order-summary').innerHTML = `
+    ${cart.map(i => `<div class="or"><span>${i.emoji} ${i.name} x${i.qty}</span><span>${formatMoney(i.price * i.qty)}</span></div>`).join('')}
+    <div class="total"><span>รวม</span><span>${formatMoney(total)}</span></div>`;
+  document.getElementById('order-modal').classList.add('show');
+}
+function closeOrderForm() {
+  document.getElementById('order-modal').classList.remove('show');
+}
+function setShip(m) {
+  shipMethod = m;
+  ['delivery', 'pickup'].forEach(s => document.getElementById('ship-' + s).classList.toggle('active', s === m));
+  document.getElementById('address-row').style.display = m === 'pickup' ? 'none' : '';
+}
+
+// SUBMIT ORDER
+function submitOrder() {
+  const name = document.getElementById('o-name').value.trim();
+  const phone = document.getElementById('o-phone').value.trim();
+  const address = shipMethod === 'delivery' ? document.getElementById('o-address').value.trim() : 'รับเองที่ร้าน';
+  if (!name || !phone) { alert('กรุณากรอกชื่อและเบอร์โทรศัพท์'); return; }
+  if (shipMethod === 'delivery' && !address) { alert('กรุณากรอกที่อยู่จัดส่ง'); return; }
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const profit = cart.reduce((s, i) => s + (i.price - i.cost) * i.qty, 0);
+  const result = deductStock(cart.map(i => ({ id: i.id, qty: i.qty })));
+  if (!result.ok) { alert('เกิดข้อผิดพลาด: ' + result.errors.join(', ')); return; }
+  const order = addOrder({
+    customer: { name, phone, address },
+    items: [...cart],
+    total, profit,
+    shipMethod,
+    channel: 'online',
+    payment: 'promptpay',
+    status: 'pending',
+  });
+  pendingOrder = order;
+  closeOrderForm();
+  const settings = getSettings();
+  document.getElementById('pay-number').textContent = 'พร้อมเพย์: ' + settings.promptpay;
+  document.getElementById('pay-amount').textContent = formatMoney(total);
+  document.getElementById('pay-orderId').textContent = 'เลขที่ออเดอร์: ' + order.id;
+  document.getElementById('payment-modal').classList.add('show');
+}
+
+function confirmPayment() {
+  if (pendingOrder) updateOrderStatus(pendingOrder.id, 'paid');
+  document.getElementById('payment-modal').classList.remove('show');
+  document.getElementById('success-orderid').textContent = 'เลขที่: ' + (pendingOrder?.id || '');
+  document.getElementById('success-modal').classList.add('show');
+  cart = [];
+  pendingOrder = null;
+  updateCartUI();
+  renderProducts(document.getElementById('search').value);
+}
+
+function closeSuccess() {
+  document.getElementById('success-modal').classList.remove('show');
+}
+
+// LISTEN
+window.addEventListener('stockUpdated', () => renderProducts(document.getElementById('search').value));
+
+// INIT
+renderCats();
+renderProducts();
+</script>
+</body>
+</html>

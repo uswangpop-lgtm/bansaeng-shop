@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — บ้านกันแสง</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#2D6A4F;--green-l:#52B788;--green-p:#D8F3DC;
+  --gold:#B7881A;--red:#C62828;--amber:#E65100;
+  --text:#1B2D1B;--text2:#4A6741;--text3:#7D9B78;
+  --bg:#F0F4F0;--white:#FFFFFF;--border:#DDE8DC;
+  --font:'Sarabun',sans-serif;--r:12px;
+  --shadow:0 2px 16px rgba(45,106,79,.1);
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text)}
+.topbar{background:var(--green);color:white;padding:.75rem 2rem;display:flex;align-items:center;gap:1rem}
+.topbar h1{font-size:1rem;font-weight:700;flex:1}
+.topbar a{color:rgba(255,255,255,.7);text-decoration:none;font-size:.85rem}
+.topbar a:hover{color:white}
+.content{max-width:1300px;margin:0 auto;padding:1.5rem}
+.section-title{font-family:'Noto Serif Thai',serif;font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:1rem}
+
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--white);border-radius:var(--r);padding:1.25rem 1.5rem;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent,var(--green))}
+.stat-card .lbl{font-size:.75rem;color:var(--text3);font-weight:600;margin-bottom:.3rem}
+.stat-card .val{font-size:1.7rem;font-weight:700;color:var(--text);line-height:1}
+.stat-card .sub{font-size:.75rem;color:var(--text3);margin-top:.25rem}
+.stat-card .icon{position:absolute;right:1rem;top:50%;transform:translateY(-50%);font-size:2rem;opacity:.15}
+
+/* CHART GRID */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem}
+@media(max-width:768px){.chart-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--white);border-radius:var(--r);padding:1.5rem;box-shadow:var(--shadow);border:1px solid var(--border)}
+.chart-card h3{font-size:.9rem;font-weight:700;color:var(--text2);margin-bottom:1rem}
+
+/* TABLE */
+.table-card{background:var(--white);border-radius:var(--r);padding:1.5rem;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:1.5rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{padding:.65rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg);letter-spacing:.04em}
+td{padding:.7rem 1rem;border-bottom:1px solid #F0F4F0}
+tr:last-child td{border:none}
+.badge{display:inline-block;padding:.2rem .65rem;border-radius:20px;font-size:.7rem;font-weight:700}
+.bg{background:var(--green-p);color:var(--green)}
+.br{background:#FFEBEE;color:var(--red)}
+.ba{background:#FFF3E0;color:var(--amber)}
+.bb{background:#E3F2FD;color:#1565C0}
+
+/* TABS */
+.tabs{display:flex;gap:.5rem;margin-bottom:1rem}
+.tab{padding:.45rem 1.1rem;border-radius:20px;font-size:.82rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--text2);font-family:var(--font);transition:.2s}
+.tab.active{background:var(--green);color:white;border-color:var(--green)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html">← หน้าหลัก</a>
+  <h1>📊 Dashboard — รายงานยอดขาย</h1>
+  <a href="admin.html">จัดการสต็อก</a>
+  <a href="pos.html">POS</a>
+</div>
+
+<div class="content">
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid" id="stat-grid"></div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('today',this)">วันนี้</button>
+    <button class="tab" onclick="switchTab('week',this)">7 วัน</button>
+    <button class="tab" onclick="switchTab('month',this)">เดือนนี้</button>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>📈 ยอดขาย (7 วันล่าสุด)</h3>
+      <canvas id="revenue-chart" height="200"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>🥧 ยอดขายแยกช่องทาง</h3>
+      <canvas id="channel-chart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- TOP PRODUCTS + RECENT ORDERS -->
+  <div class="chart-grid">
+    <div class="table-card">
+      <h3 class="section-title">🏆 สินค้าขายดี</h3>
+      <table>
+        <thead><tr><th>#</th><th>สินค้า</th><th>จำนวนขาย</th><th>ยอดรวม</th></tr></thead>
+        <tbody id="top-products"></tbody>
+      </table>
+    </div>
+    <div class="table-card">
+      <h3 class="section-title">🛒 ออเดอร์ล่าสุด</h3>
+      <table>
+        <thead><tr><th>เลขที่</th><th>ช่องทาง</th><th>ยอด</th><th>สถานะ</th></tr></thead>
+        <tbody id="recent-orders"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- STOCK STATUS -->
+  <div class="table-card">
+    <h3 class="section-title">📦 สถานะสต็อกสินค้า</h3>
+    <table>
+      <thead><tr><th>สินค้า</th><th>หมวดหมู่</th><th>คงเหลือ</th><th>สต็อกต่ำสุด</th><th>มูลค่าสต็อก</th><th>สถานะ</th></tr></thead>
+      <tbody id="stock-status"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="js/store.js"></script>
+<script>
+let revenueChart, channelChart;
+let currentTab = 'today';
+
+// STATS
+function renderStats() {
+  const today = getTodayStats();
+  const month = getMonthStats();
+  const products = getProducts(true);
+  const low = getLowStock();
+  const allOrders = getOrders();
+  const pending = allOrders.filter(o => o.status === 'pending').length;
+  const monthProfit = month.profit;
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card" style="--accent:#2D6A4F">
+      <div class="icon">💰</div>
+      <div class="lbl">ยอดขายวันนี้</div>
+      <div class="val">${formatMoney(today.revenue)}</div>
+      <div class="sub">${today.orders} บิล · กำไร ${formatMoney(today.profit)}</div>
+    </div>
+    <div class="stat-card" style="--accent:#52B788">
+      <div class="icon">📅</div>
+      <div class="lbl">ยอดขายเดือนนี้</div>
+      <div class="val">${formatMoney(month.revenue)}</div>
+      <div class="sub">${month.orders} บิล · กำไร ${formatMoney(monthProfit)}</div>
+    </div>
+    <div class="stat-card" style="--accent:#B7881A">
+      <div class="icon">⏳</div>
+      <div class="lbl">รอยืนยัน</div>
+      <div class="val" style="color:${pending?'var(--amber)':'var(--green)'}">${pending}</div>
+      <div class="sub">ออเดอร์ออนไลน์</div>
+    </div>
+    <div class="stat-card" style="--accent:#C62828">
+      <div class="icon">⚠️</div>
+      <div class="lbl">สต็อกใกล้หมด</div>
+      <div class="val" style="color:${low.length?'var(--red)':'var(--green)'}">${low.length}</div>
+      <div class="sub">รายการ</div>
+    </div>
+    <div class="stat-card" style="--accent:#1D9E75">
+      <div class="icon">📦</div>
+      <div class="lbl">สินค้าทั้งหมด</div>
+      <div class="val">${products.length}</div>
+      <div class="sub">รายการ</div>
+    </div>
+    <div class="stat-card" style="--accent:#534AB7">
+      <div class="icon">🛒</div>
+      <div class="lbl">ออเดอร์ทั้งหมด</div>
+      <div class="val">${allOrders.length}</div>
+      <div class="sub">รายการ</div>
+    </div>
+  `;
+}
+
+// CHARTS
+function buildRevenueChart() {
+  const labels = [];
+  const data = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    labels.push(d.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric' }));
+    const dayStr = d.toDateString();
+    const dayOrders = getOrders().filter(o => new Date(o.createdAt).toDateString() === dayStr && o.status !== 'cancelled');
+    data.push(dayOrders.reduce((s, o) => s + (o.total || 0), 0));
+  }
+  if (revenueChart) revenueChart.destroy();
+  revenueChart = new Chart(document.getElementById('revenue-chart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'ยอดขาย (บาท)',
+        data,
+        backgroundColor: 'rgba(45,106,79,.7)',
+        borderColor: '#2D6A4F',
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { callback: v => '฿' + v.toLocaleString() }, grid: { color: '#F0F4F0' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+function buildChannelChart() {
+  const orders = getOrders().filter(o => o.status !== 'cancelled');
+  const pos = orders.filter(o => o.channel === 'pos').reduce((s, o) => s + (o.total || 0), 0);
+  const online = orders.filter(o => o.channel === 'online').reduce((s, o) => s + (o.total || 0), 0);
+  if (channelChart) channelChart.destroy();
+  channelChart = new Chart(document.getElementById('channel-chart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['🏪 หน้าร้าน', '🌐 ออนไลน์'],
+      datasets: [{
+        data: [pos || 0, online || 0],
+        backgroundColor: ['#2D6A4F', '#52B788'],
+        borderColor: '#FFFFFF',
+        borderWidth: 3,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '60%',
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Sarabun', size: 13 } } },
+        tooltip: { callbacks: { label: ctx => ' ' + formatMoney(ctx.parsed) } }
+      }
+    }
+  });
+}
+
+// TOP PRODUCTS
+function renderTopProducts() {
+  const orders = getOrders().filter(o => o.status !== 'cancelled');
+  const counts = {};
+  orders.forEach(o => {
+    (o.items || []).forEach(i => {
+      counts[i.id] = counts[i.id] || { name: i.name, emoji: i.emoji, qty: 0, revenue: 0 };
+      counts[i.id].qty += i.qty;
+      counts[i.id].revenue += i.price * i.qty;
+    });
+  });
+  const sorted = Object.values(counts).sort((a, b) => b.revenue - a.revenue).slice(0, 8);
+  document.getElementById('top-products').innerHTML = sorted.length
+    ? sorted.map((p, i) => `<tr>
+        <td><strong style="color:var(--text3)">${i + 1}</strong></td>
+        <td>${p.emoji} ${p.name}</td>
+        <td>${p.qty} ชิ้น</td>
+        <td><strong>${formatMoney(p.revenue)}</strong></td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:1.5rem">ยังไม่มีข้อมูล</td></tr>';
+}
+
+// RECENT ORDERS
+function renderRecentOrders() {
+  const orders = getOrders().slice(0, 10);
+  const statusMap = { pending:'⏳ รอ', paid:'✅ ชำระ', completed:'📦 เสร็จ', cancelled:'❌ ยกเลิก' };
+  const badgeMap = { pending:'ba', paid:'bb', completed:'bg', cancelled:'br' };
+  document.getElementById('recent-orders').innerHTML = orders.length
+    ? orders.map(o => `<tr>
+        <td style="font-size:.72rem;font-family:monospace">${o.id.slice(-8)}</td>
+        <td>${o.channel === 'pos' ? '🏪' : '🌐'} ${o.channel === 'pos' ? 'หน้าร้าน' : 'ออนไลน์'}</td>
+        <td><strong>${formatMoney(o.total)}</strong></td>
+        <td><span class="badge ${badgeMap[o.status]||'bg'}">${statusMap[o.status]||o.status}</span></td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:1.5rem">ยังไม่มีออเดอร์</td></tr>';
+}
+
+// STOCK STATUS
+function renderStockStatus() {
+  const products = getProducts();
+  document.getElementById('stock-status').innerHTML = products.map(p => {
+    const low = p.stock <= p.minStock && p.stock > 0;
+    const out = p.stock <= 0;
+    const val = p.stock * p.cost;
+    return `<tr>
+      <td>${p.image} <strong>${p.name}</strong></td>
+      <td>${p.category}</td>
+      <td><strong style="color:${out?'var(--red)':low?'var(--amber)':'var(--text)'}">${p.stock}</strong> ${p.unit}</td>
+      <td>${p.minStock} ${p.unit}</td>
+      <td>${formatMoney(val)}</td>
+      <td><span class="badge ${out?'br':low?'ba':'bg'}">${out?'หมด':low?'ใกล้หมด':'ปกติ'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function switchTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderStats();
+}
+
+// INIT
+renderStats();
+buildRevenueChart();
+buildChannelChart();
+renderTopProducts();
+renderRecentOrders();
+renderStockStatus();
+
+window.addEventListener('stockUpdated', () => { renderStats(); renderStockStatus(); });
+window.addEventListener('ordersUpdated', () => { renderStats(); renderTopProducts(); renderRecentOrders(); buildChannelChart(); buildRevenueChart(); });
+</script>
+</body>
+</html>

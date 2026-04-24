@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บ้านกันแสง — ระบบจัดการร้านค้า</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#2D6A4F;--green-light:#52B788;--green-pale:#D8F3DC;
+  --gold:#B7881A;--gold-light:#E9C46A;
+  --dark:#1A1A2E;--dark2:#16213E;
+  --text:#1B2D1B;--text2:#4A6741;--text3:#7D9B78;
+  --bg:#F8FAF8;--white:#FFFFFF;
+  --radius:12px;--shadow:0 4px 24px rgba(45,106,79,.12);
+  --font-th:'Sarabun',sans-serif;
+}
+body{font-family:var(--font-th);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+/* NAV */
+nav{background:var(--white);border-bottom:1px solid #E8F0E6;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:22px;height:22px;fill:white}
+.logo-text{font-family:'Noto Serif Thai',serif;font-size:1.1rem;font-weight:700;color:var(--green);line-height:1.2}
+.logo-sub{font-size:.7rem;color:var(--text3);font-weight:400}
+nav .nav-links{display:flex;gap:.5rem}
+nav .nav-links a{padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.9rem;color:var(--text2);font-weight:500;transition:.2s}
+nav .nav-links a:hover{background:var(--green-pale);color:var(--green)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem 1.4rem;border-radius:var(--radius);font-family:var(--font-th);font-size:.9rem;font-weight:600;cursor:pointer;transition:.2s;text-decoration:none;border:none}
+.btn-primary{background:var(--green);color:white}
+.btn-primary:hover{background:#235C41;transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+.btn-outline:hover{background:var(--green-pale)}
+
+/* HERO */
+.hero{padding:5rem 2rem 4rem;text-align:center;max-width:720px;margin:0 auto}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-pale);color:var(--green);padding:.4rem 1rem;border-radius:20px;font-size:.8rem;font-weight:600;margin-bottom:1.5rem}
+.hero h1{font-family:'Noto Serif Thai',serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:700;color:var(--text);line-height:1.3;margin-bottom:1rem}
+.hero h1 span{color:var(--green)}
+.hero p{font-size:1.05rem;color:var(--text2);line-height:1.8;margin-bottom:2.5rem;max-width:560px;margin-left:auto;margin-right:auto}
+.hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+/* FEATURES */
+.features{padding:3rem 2rem;max-width:1100px;margin:0 auto;width:100%}
+.section-label{text-align:center;font-size:.8rem;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem}
+.section-title{text-align:center;font-family:'Noto Serif Thai',serif;font-size:1.8rem;color:var(--text);margin-bottom:2.5rem}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.card{background:var(--white);border-radius:var(--radius);padding:1.75rem;box-shadow:var(--shadow);border:1px solid #E8F0E6;transition:.2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(45,106,79,.18)}
+.card-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+.card h3{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.5rem}
+.card p{font-size:.875rem;color:var(--text2);line-height:1.7}
+.ic-green{background:var(--green-pale)}
+.ic-gold{background:#FFF8E7}
+
+/* CHANNELS */
+.channels{padding:3rem 2rem;background:var(--green);margin:2rem 0}
+.channels-inner{max-width:900px;margin:0 auto;text-align:center}
+.channels h2{font-family:'Noto Serif Thai',serif;font-size:1.8rem;color:white;margin-bottom:.75rem}
+.channels p{color:rgba(255,255,255,.8);margin-bottom:2rem;font-size:1rem}
+.channel-pills{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.15);color:white;padding:.5rem 1.25rem;border-radius:20px;font-size:.875rem;font-weight:600;border:1px solid rgba(255,255,255,.3)}
+
+/* LOGIN CARDS */
+.login-section{padding:3rem 2rem 4rem;max-width:900px;margin:0 auto;width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.login-card{background:var(--white);border-radius:16px;padding:2rem;box-shadow:var(--shadow);border:2px solid transparent;transition:.2s;cursor:pointer}
+.login-card:hover{border-color:var(--green);transform:translateY(-3px)}
+.login-card h3{font-size:1.15rem;font-weight:700;margin:.75rem 0 .5rem}
+.login-card p{font-size:.875rem;color:var(--text2);line-height:1.7;margin-bottom:1.25rem}
+.lc-icon{font-size:2rem;display:block}
+
+/* FOOTER */
+footer{background:var(--text);color:rgba(255,255,255,.6);text-align:center;padding:1.5rem;font-size:.8rem;margin-top:auto}
+footer strong{color:white}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">บ้านกันแสง</div>
+      <div class="logo-sub">วิสาหกิจชุมชน</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="pos.html">หน้าร้าน (POS)</a>
+    <a href="online.html">ร้านออนไลน์</a>
+    <a href="admin.html">จัดการสต็อก</a>
+    <a href="dashboard.html">รายงาน</a>
+  </div>
+  <a href="admin.html" class="btn btn-primary">เข้าสู่ระบบ</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Real-Time · Online · ฟรี
+  </div>
+  <h1>ระบบขายสินค้า<br><span>วิสาหกิจชุมชนบ้านกันแสง</span></h1>
+  <p>จัดการหน้าร้านและออนไลน์ในที่เดียว สต็อกอัปเดตแบบ Real-Time ทั้งสองช่องทาง ใช้ง่าย ไม่ต้องติดตั้ง เปิดผ่านเบราว์เซอร์ได้เลย</p>
+  <div class="hero-actions">
+    <a href="pos.html" class="btn btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      เปิดหน้าร้าน (POS)
+    </a>
+    <a href="online.html" class="btn btn-outline">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      ร้านค้าออนไลน์
+    </a>
+  </div>
+</section>
+
+<section class="features">
+  <div class="section-label">ฟีเจอร์หลัก</div>
+  <div class="section-title">ครบทุกอย่างในระบบเดียว</div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-icon ic-green">🏪</div>
+      <h3>POS หน้าร้าน</h3>
+      <p>แคชเชียร์ค้นหาสินค้า เพิ่มตะกร้า รับชำระเงินสด/QR/โอน ออกใบเสร็จทันที</p>
+    </div>
+    <div class="card">
+      <div class="card-icon ic-green">🌐</div>
+      <h3>ร้านออนไลน์</h3>
+      <p>ลูกค้าเลือกสินค้า สั่งซื้อผ่านเว็บ เห็นสต็อกจริง ชำระผ่านพร้อมเพย์/โอน</p>
+    </div>
+    <div class="card">
+      <div class="card-icon ic-gold">📦</div>
+      <h3>สต็อก Real-Time</h3>
+      <p>ตัดสต็อกอัตโนมัติทั้งหน้าร้านและออนไลน์ แจ้งเตือนเมื่อสินค้าใกล้หมด</p>
+    </div>
+    <div class="card">
+      <div class="card-icon ic-green">📊</div>
+      <h3>รายงานยอดขาย</h3>
+      <p>Dashboard สรุปยอดขายรายวัน/เดือน สินค้าขายดี กำไร-ขาดทุน</p>
+    </div>
+    <div class="card">
+      <div class="card-icon ic-gold">👥</div>
+      <h3>จัดการสินค้า</h3>
+      <p>เพิ่ม/แก้ไขสินค้า ตั้งราคา อัปโหลดรูป จัดหมวดหมู่ กำหนดสต็อกขั้นต่ำ</p>
+    </div>
+    <div class="card">
+      <div class="card-icon ic-green">🔔</div>
+      <h3>แจ้งเตือนอัตโนมัติ</h3>
+      <p>แจ้งเมื่อมีออเดอร์ใหม่ สต็อกต่ำ และสรุปยอดขายประจำวัน</p>
+    </div>
+  </div>
+</section>
+
+<section class="channels">
+  <div class="channels-inner">
+    <h2>ขายได้ทุกช่องทาง</h2>
+    <p>ระบบรองรับทั้งหน้าร้าน และช่องทางออนไลน์ สต็อกอัปเดตเดียวกัน</p>
+    <div class="channel-pills">
+      <div class="pill">🏪 หน้าร้าน POS</div>
+      <div class="pill">🌐 เว็บไซต์</div>
+      <div class="pill">💚 LINE OA</div>
+      <div class="pill">📘 Facebook Shop</div>
+      <div class="pill">📦 Kerry / ไปรษณีย์</div>
+      <div class="pill">🛵 นัดรับเอง</div>
+    </div>
+  </div>
+</section>
+
+<section class="login-section">
+  <div class="section-label">เริ่มใช้งาน</div>
+  <div class="section-title">เข้าสู่ระบบตามบทบาท</div>
+  <div class="grid-2">
+    <div class="login-card" onclick="location.href='pos.html'">
+      <span class="lc-icon">🏪</span>
+      <h3>พนักงานขายหน้าร้าน</h3>
+      <p>เปิดหน้า POS สำหรับแคชเชียร์ ค้นหาสินค้า รับชำระเงิน ออกใบเสร็จ</p>
+      <a href="pos.html" class="btn btn-primary" style="width:100%;justify-content:center">เปิด POS หน้าร้าน →</a>
+    </div>
+    <div class="login-card" onclick="location.href='admin.html'">
+      <span class="lc-icon">⚙️</span>
+      <h3>แอดมิน / ผู้จัดการ</h3>
+      <p>จัดการสินค้า สต็อก ดูรายงานยอดขาย จัดการออเดอร์ออนไลน์</p>
+      <a href="admin.html" class="btn btn-primary" style="width:100%;justify-content:center">เข้าระบบแอดมิน →</a>
+    </div>
+    <div class="login-card" onclick="location.href='online.html'">
+      <span class="lc-icon">🛍️</span>
+      <h3>ลูกค้า — ร้านออนไลน์</h3>
+      <p>เลือกดูสินค้า เพิ่มตะกร้า สั่งซื้อออนไลน์ ชำระผ่านพร้อมเพย์</p>
+      <a href="online.html" class="btn btn-outline" style="width:100%;justify-content:center">ดูร้านค้าออนไลน์ →</a>
+    </div>
+    <div class="login-card" onclick="location.href='dashboard.html'">
+      <span class="lc-icon">📊</span>
+      <h3>ผู้บริหาร — รายงาน</h3>
+      <p>Dashboard ยอดขาย กำไร สต็อก สินค้าขายดี รายงานรายวัน/เดือน</p>
+      <a href="dashboard.html" class="btn btn-outline" style="width:100%;justify-content:center">ดู Dashboard →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong>วิสาหกิจชุมชนบ้านกันแสง</strong> · ระบบจัดการร้านค้า Omnichannel · พัฒนาด้วย HTML/CSS/JS · Deploy ฟรีบน Cloudinary/GitHub Pages
+</footer>
+
+</body>
+</html>
