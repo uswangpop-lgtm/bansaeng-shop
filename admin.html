@@ -176,26 +176,74 @@ tr:hover td{background:#FAFCFA}
 
     <!-- STOCK IN PAGE -->
     <div class="page" id="page-stock">
-      <div class="table-card">
-        <div class="table-head"><h3>📥 รับสินค้าเข้า</h3></div>
-        <div style="padding:1.5rem">
-          <div class="form-row"><label>เลือกสินค้า</label>
-            <select id="stock-product" style="width:100%;padding:.65rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none"></select>
+
+      <!-- ฟอร์มรับสินค้าเข้า -->
+      <div class="table-card" style="margin-bottom:1.25rem">
+        <div class="table-head"><h3>📥 บันทึกรับสินค้าเข้า</h3></div>
+        <div style="padding:1.25rem 1.5rem 1.5rem">
+
+          <!-- ขั้น 1: เลือกหมวดหมู่ -->
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
+            <span style="width:24px;height:24px;border-radius:50%;background:var(--green);color:white;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</span>
+            <label style="font-size:.85rem;font-weight:700;color:var(--text2)">เลือกหมวดหมู่</label>
+          </div>
+          <select id="sc-cat" onchange="scFilterProducts()"
+            style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none;margin-bottom:1rem;transition:.2s">
+            <option value="">-- ทุกหมวดหมู่ --</option>
+          </select>
+
+          <!-- ขั้น 2: ค้นหา + เลือกสินค้า -->
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
+            <span style="width:24px;height:24px;border-radius:50%;background:var(--green);color:white;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</span>
+            <label style="font-size:.85rem;font-weight:700;color:var(--text2)">ค้นหา / เลือกสินค้า</label>
+          </div>
+          <input type="text" id="sc-search" placeholder="🔍 พิมพ์ชื่อสินค้าเพื่อค้นหา..." oninput="scFilterProducts()"
+            style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none;margin-bottom:.5rem;transition:.2s">
+          <select id="stock-product" size="6" onchange="scShowPreview()"
+            style="width:100%;border:2px solid var(--green);border-radius:var(--r);font-family:var(--font);font-size:.875rem;outline:none;margin-bottom:.75rem;background:white;padding:.25rem">
+          </select>
+
+          <!-- preview สินค้าที่เลือก -->
+          <div id="sc-preview" style="display:none;background:var(--green-p);border:1px solid var(--green-l);border-radius:var(--r);padding:.85rem 1rem;margin-bottom:1rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+              <div>
+                <span id="sc-pname" style="font-weight:700;font-size:.95rem"></span>
+                <span id="sc-pcat" style="font-size:.75rem;color:var(--text2);margin-left:.5rem"></span>
+              </div>
+              <div style="display:flex;gap:1.5rem;font-size:.85rem">
+                <span>คงเหลือ: <strong id="sc-pstock" style="color:var(--green)"></strong></span>
+                <span>ต่ำสุด: <strong id="sc-pmin"></strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ขั้น 3: จำนวน + หมายเหตุ -->
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
+            <span style="width:24px;height:24px;border-radius:50%;background:var(--green);color:white;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</span>
+            <label style="font-size:.85rem;font-weight:700;color:var(--text2)">ระบุจำนวนและหมายเหตุ</label>
           </div>
           <div class="form-grid">
-            <div class="form-row"><label>จำนวนที่รับเข้า</label><input type="number" id="stock-qty" min="1" value="1" placeholder="จำนวน"></div>
+            <div class="form-row"><label>จำนวนที่รับเข้า *</label><input type="number" id="stock-qty" min="1" value="1" placeholder="จำนวน"></div>
             <div class="form-row"><label>หมายเหตุ</label><input type="text" id="stock-note" placeholder="เช่น รับจากซัพพลายเออร์"></div>
           </div>
-          <button class="btn btn-green" onclick="doAddStock()" style="margin-top:.5rem">✓ บันทึกรับสินค้าเข้า</button>
+          <button class="btn btn-green" onclick="doAddStock()" style="width:100%;margin-top:.75rem;padding:.85rem;font-size:1rem;justify-content:center">
+            ✅ บันทึกรับสินค้าเข้า
+          </button>
         </div>
-        <div style="padding:0 1.5rem 1.5rem">
-          <div style="font-size:.85rem;font-weight:700;color:var(--text2);margin-bottom:.75rem">สต็อกปัจจุบัน</div>
-          <div style="overflow-x:auto">
-            <table>
-              <thead><tr><th>สินค้า</th><th>หมวดหมู่</th><th>คงเหลือ</th><th>ต่ำสุด</th><th>สถานะ</th></tr></thead>
-              <tbody id="stock-tbody"></tbody>
-            </table>
-          </div>
+      </div>
+
+      <!-- ตารางสต็อกปัจจุบัน -->
+      <div class="table-card">
+        <div class="table-head">
+          <h3>📋 สต็อกปัจจุบัน</h3>
+          <input type="text" id="sc-table-search" placeholder="ค้นหา..." oninput="scRenderTable()"
+            style="padding:.4rem .85rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.82rem;outline:none;width:180px">
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>สินค้า</th><th>หมวดหมู่</th><th>คงเหลือ</th><th>ต่ำสุด</th><th>สถานะ</th></tr></thead>
+            <tbody id="stock-tbody"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -496,9 +544,9 @@ function renderProductTable() {
         : low ? '<span class="badge badge-amber">ใกล้หมด</span>'
         : '<span class="badge badge-green">มีสินค้า</span>'}
       </td>
-      <td style="display:flex;gap:.5rem">
+      <td style="display:flex;gap:.4rem;flex-wrap:wrap">
         <button class="btn btn-outline btn-sm" onclick="openEditProduct('${p.id}')">✏️ แก้ไข</button>
-        <button class="btn btn-outline btn-sm" style="color:var(--amber,#E65100);border-color:var(--amber,#E65100)" onclick="doToggleProduct('${p.id}')">${p.active ? '🔕 ปิด' : '✅ เปิด'}</button>
+        <button class="btn btn-outline btn-sm" style="color:#E65100;border-color:#E65100" onclick="doDeleteProduct('${p.id}')">${p.active ? '🔕 ปิด' : '✅ เปิด'}</button>
         <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:var(--red)" onclick="doRemoveProduct('${p.id}')">🗑️ ลบ</button>
       </td>
     </tr>`;
@@ -556,12 +604,10 @@ function saveProduct() {
   renderProductTable();
   renderOverview();
 }
-// ปิด/เปิดการขาย (ซ่อนชั่วคราว)
-function doToggleProduct(id) {
+function doDeleteProduct(id) {
   const p = getProduct(id);
   if (!p) return;
-  const action = p.active ? 'ปิดการขาย' : 'เปิดการขาย';
-  if (!confirm(action + ' "' + p.name + '"?')) return;
+  if (!confirm((p.active ? 'ปิดการขาย' : 'เปิดการขาย') + ' "' + p.name + '"?')) return;
   const all = getProducts();
   const idx = all.findIndex(x => x.id === id);
   all[idx].active = !all[idx].active;
@@ -570,38 +616,22 @@ function doToggleProduct(id) {
   renderOverview();
 }
 
-// ลบถาวรออกจากระบบ
 function doRemoveProduct(id) {
   const p = getProduct(id);
   if (!p) return;
-  if (!confirm('🗑️ ลบ "' + p.name + '" ออกจากระบบถาวร?\n\n⚠️ ข้อมูลจะหายไปและไม่สามารถกู้คืนได้')) return;
-  // แสดง confirm ซ้ำเพื่อป้องกันกดพลาด
-  if (!confirm('ยืนยันอีกครั้ง: ลบ "' + p.name + '" ถาวร?')) return;
+  if (!confirm('🗑️ ลบ "' + p.name + '" ออกจากระบบถาวร?\n\n⚠️ ไม่สามารถกู้คืนได้')) return;
+  if (!confirm('ยืนยันอีกครั้ง: ลบ "' + p.name + '" ถาวรใช่ไหม?')) return;
   const all = getProducts().filter(x => x.id !== id);
   saveProducts(all);
-  // refresh category dropdown
   const sel = document.getElementById('p-cat');
   if (sel) { while(sel.options.length > 1) sel.remove(1); }
   renderProductTable();
   renderOverview();
-  showDeleteToast('🗑️ ลบ "' + p.name + '" ออกจากระบบแล้ว');
-}
-
-function showDeleteToast(msg) {
-  let t = document.getElementById('del-toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'del-toast';
-    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);'
-      + 'background:#C62828;color:white;padding:.85rem 1.75rem;border-radius:12px;'
-      + 'font-weight:700;font-size:.9rem;z-index:999;'
-      + 'box-shadow:0 4px 20px rgba(0,0,0,.25);transition:opacity .3s;font-family:Sarabun,sans-serif';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(t._t);
-  t._t = setTimeout(function(){ t.style.opacity='0'; }, 3000);
+  const t = document.createElement('div');
+  t.textContent = '🗑️ ลบ "' + p.name + '" เรียบร้อยแล้ว';
+  t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#C62828;color:white;padding:.85rem 1.75rem;border-radius:12px;font-weight:700;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.25)';
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 3000);
 }
 
 // ORDERS
@@ -642,29 +672,90 @@ function renderOrders() {
 
 // STOCK PAGE
 function renderStockPage() {
-  const prods = getProducts(true);
-  const sel = document.getElementById('stock-product');
-  sel.innerHTML = prods.map(p => `<option value="${p.id}">${p.image} ${p.name} (เหลือ: ${p.stock} ${p.unit})</option>`).join('');
-  document.getElementById('stock-tbody').innerHTML = getProducts().map(p => {
-    const low = p.stock <= p.minStock;
-    return `<tr>
-      <td>${p.image} <strong>${p.name}</strong></td>
-      <td>${p.category}</td>
-      <td><strong style="color:${p.stock<=0?'var(--red)':low?'var(--amber)':'var(--text)'}">${p.stock}</strong> ${p.unit}</td>
-      <td>${p.minStock}</td>
-      <td>${p.stock<=0?'<span class="badge badge-red">หมด</span>':low?'<span class="badge badge-amber">ใกล้หมด</span>':'<span class="badge badge-green">ปกติ</span>'}</td>
-    </tr>`;
+  // โหลด category dropdown
+  var catSel = document.getElementById('sc-cat');
+  var savedCat = catSel.value;
+  var cats = [];
+  getProducts(true).forEach(function(p){ if(cats.indexOf(p.category)<0) cats.push(p.category); });
+  cats.sort();
+  catSel.innerHTML = '<option value="">-- ทุกหมวดหมู่ --</option>'
+    + cats.map(function(cat){ return '<option value="' + cat + '">' + cat + '</option>'; }).join('');
+  catSel.value = savedCat;
+  scFilterProducts();
+  scRenderTable();
+}
+
+function scFilterProducts() {
+  var cat = document.getElementById('sc-cat').value;
+  var q = (document.getElementById('sc-search').value || '').toLowerCase();
+  var prods = getProducts(true);
+  if (cat) prods = prods.filter(function(p){ return p.category === cat; });
+  if (q) prods = prods.filter(function(p){ return p.name.toLowerCase().indexOf(q) >= 0; });
+  var sel = document.getElementById('stock-product');
+  var prevId = sel.value;
+  if (!prods.length) {
+    sel.innerHTML = '<option value="">-- ไม่พบสินค้า --</option>';
+    document.getElementById('sc-preview').style.display = 'none';
+    return;
+  }
+  sel.innerHTML = prods.map(function(p){
+    var out = p.stock <= 0, low = p.stock > 0 && p.stock <= p.minStock;
+    var flag = out ? ' ❌' : low ? ' ⚠️' : '';
+    return '<option value="' + p.id + '">' + p.image + ' ' + p.name + flag
+      + '  (เหลือ: ' + p.stock + ' ' + p.unit + ')  |  ' + p.category + '</option>';
+  }).join('');
+  if (prevId && prods.find(function(p){ return p.id === prevId; })) sel.value = prevId;
+  else sel.value = prods[0].id;
+  scShowPreview();
+}
+
+function scShowPreview() {
+  var id = document.getElementById('stock-product').value;
+  var p = id ? getProduct(id) : null;
+  var box = document.getElementById('sc-preview');
+  if (!p) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  document.getElementById('sc-pname').textContent = p.image + ' ' + p.name;
+  document.getElementById('sc-pcat').textContent = p.category;
+  var stEl = document.getElementById('sc-pstock');
+  stEl.textContent = p.stock + ' ' + p.unit;
+  stEl.style.color = p.stock <= 0 ? 'var(--red)' : p.stock <= p.minStock ? 'var(--amber)' : 'var(--green)';
+  document.getElementById('sc-pmin').textContent = p.minStock + ' ' + p.unit;
+}
+
+function scRenderTable() {
+  var q = (document.getElementById('sc-table-search') ? document.getElementById('sc-table-search').value : '').toLowerCase();
+  var prods = getProducts();
+  if (q) prods = prods.filter(function(p){ return p.name.toLowerCase().indexOf(q) >= 0 || p.category.toLowerCase().indexOf(q) >= 0; });
+  document.getElementById('stock-tbody').innerHTML = prods.map(function(p){
+    var low = p.stock <= p.minStock;
+    return '<tr>'
+      + '<td>' + p.image + ' <strong>' + p.name + '</strong></td>'
+      + '<td>' + p.category + '</td>'
+      + '<td><strong style="color:' + (p.stock<=0?'var(--red)':low?'var(--amber)':'var(--text)') + '">' + p.stock + '</strong> ' + p.unit + '</td>'
+      + '<td>' + p.minStock + '</td>'
+      + '<td>' + (p.stock<=0 ? '<span class="badge badge-red">หมด</span>' : low ? '<span class="badge badge-amber">ใกล้หมด</span>' : '<span class="badge badge-green">ปกติ</span>') + '</td>'
+      + '</tr>';
   }).join('');
 }
+
 function doAddStock() {
-  const id = document.getElementById('stock-product').value;
-  const qty = parseInt(document.getElementById('stock-qty').value) || 0;
-  if (!qty || qty < 1) { alert('กรุณาระบุจำนวน'); return; }
+  var id = document.getElementById('stock-product').value;
+  var qty = parseInt(document.getElementById('stock-qty').value) || 0;
+  if (!id) { alert('กรุณาเลือกสินค้า'); return; }
+  if (!qty || qty < 1) { alert('กรุณาระบุจำนวนที่รับเข้า'); return; }
+  var p = getProduct(id);
   addStock(id, qty);
-  alert('✅ บันทึกรับสินค้าเข้าแล้ว');
   document.getElementById('stock-qty').value = 1;
+  document.getElementById('stock-note').value = '';
   renderStockPage();
   renderOverview();
+  // toast แทน alert
+  var t = document.createElement('div');
+  t.textContent = '✅ รับเข้า ' + p.image + ' ' + p.name + ' ' + qty + ' ' + p.unit + ' สำเร็จ';
+  t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:.85rem 1.75rem;border-radius:12px;font-weight:700;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.2)';
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 3000);
 }
 
 // LOW STOCK
