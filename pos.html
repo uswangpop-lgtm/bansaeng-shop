@@ -157,6 +157,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
 </head>
 <body>
 
+<!-- Loading overlay -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:1rem">
+  <div style="width:48px;height:48px;border:5px solid #D8F3DC;border-top-color:#2D6A4F;border-radius:50%;animation:spin 1s linear infinite"></div>
+  <div style="font-family:Sarabun,sans-serif;font-weight:700;color:#2D6A4F;font-size:1rem">กำลังโหลดข้อมูล...</div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</div>
+<script>
+function showLoading(v){
+  var el=document.getElementById('loading-overlay');
+  if(el) el.style.display=v?'flex':'none';
+}
+</script>
+
+
 <div class="topbar">
   <a href="index.html">← หน้าหลัก</a>
   <h1>🏪 POS — หน้าร้าน</h1>
@@ -226,178 +240,274 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
 <div class="alert" id="alert"></div>
 
 <script>
-// ===== STORE.JS — ฐานข้อมูลกลาง (localStorage) =====
-// ใช้ localStorage เป็น database กลาง ทุกหน้าอ่าน/เขียนที่นี่
-// ใน production จะเปลี่ยนเป็น Firebase / Supabase (ฟรี)
+// ===== FIREBASE STORE — ฐานข้อมูลกลาง Real-Time =====
+const FIREBASE_URL = 'https://bansaeng-shop-default-rtdb.asia-southeast1.firebasedatabase.app';
 
-const KEYS = {
-  PRODUCTS: 'bsg_products',
-  ORDERS: 'bsg_orders',
-  SETTINGS: 'bsg_settings',
-};
+// ===== 18 หมวดหมู่ =====
+const ALL_CATEGORIES = [
+  'ของใช้ในบ้าน','อาหารและเครื่องปรุง','เครื่องดื่มไม่มีแอลกอฮอล์',
+  'เครื่องดื่มมีแอลกอฮอล์','ยาสามัญประจำบ้าน','เนื้อสัตว์',
+  'ผลไม้','ผัก','ข้าวสาร','ของใช้ในครัว','ของใช้ส่วนตัว',
+  'แม่และเด็ก','ของใช้สำนักงาน','เครื่องใช้ไฟฟ้า','อาหารสัตว์',
+  'ปุ๋ย','ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์','อื่น ๆ'
+];
 
-// ===== สินค้าตัวอย่าง =====
+// ===== สินค้าตัวอย่าง 49 รายการ =====
 const DEFAULT_PRODUCTS = [
-  { id:'P001', name:'ข้าวกล้องอินทรีย์', category:'ข้าว-ธัญพืช', price:85, cost:55, stock:50, minStock:10, unit:'กก.', image:'🌾', barcode:'8850001001', active:true },
-  { id:'P002', name:'น้ำพริกปลาทู', category:'น้ำพริก-เครื่องแกง', price:45, cost:25, stock:30, minStock:5, unit:'กระปุก', image:'🌶️', barcode:'8850001002', active:true },
-  { id:'P003', name:'กล้วยฉาบ (ต้นตำรับ)', category:'ขนม-ของฝาก', price:60, cost:35, stock:25, minStock:8, unit:'ถุง', image:'🍌', barcode:'8850001003', active:true },
-  { id:'P004', name:'น้ำผึ้งธรรมชาติ', category:'ของป่า', price:180, cost:100, stock:15, minStock:5, unit:'ขวด', image:'🍯', barcode:'8850001004', active:true },
-  { id:'P005', name:'ขนมทองม้วน', category:'ขนม-ของฝาก', price:50, cost:28, stock:40, minStock:10, unit:'กล่อง', image:'🧁', barcode:'8850001005', active:true },
-  { id:'P006', name:'ปลาส้มแผ่น', category:'อาหารแปรรูป', price:75, cost:45, stock:20, minStock:5, unit:'แพ็ค', image:'🐟', barcode:'8850001006', active:true },
-  { id:'P007', name:'ผักอินทรีย์คละ', category:'ผัก-ผลไม้', price:35, cost:18, stock:60, minStock:15, unit:'กก.', image:'🥬', barcode:'8850001007', active:true },
-  { id:'P008', name:'แยมมะม่วง', category:'แปรรูปผลไม้', price:95, cost:55, stock:18, minStock:5, unit:'ขวด', image:'🥭', barcode:'8850001008', active:true },
-  { id:'P009', name:'สบู่สมุนไพร', category:'สมุนไพร-ความงาม', price:40, cost:20, stock:35, minStock:10, unit:'ก้อน', image:'🌿', barcode:'8850001009', active:true },
-  { id:'P010', name:'ชาสมุนไพรรวม', category:'เครื่องดื่ม', price:120, cost:70, stock:22, minStock:8, unit:'กล่อง', image:'🍵', barcode:'8850001010', active:true },
-  { id:'P011', name:'หมูแดดเดียว', category:'อาหารแปรรูป', price:130, cost:80, stock:12, minStock:5, unit:'แพ็ค', image:'🥩', barcode:'8850001011', active:true },
-  { id:'P012', name:'น้ำมันมะพร้าว', category:'น้ำมัน-เครื่องปรุง', price:160, cost:95, stock:8, minStock:5, unit:'ขวด', image:'🥥', barcode:'8850001012', active:true },
+  {id:'P001',name:'น้ำยาล้างจาน',category:'ของใช้ในบ้าน',price:35,cost:22,stock:50,minStock:10,unit:'ขวด',image:'🧴',barcode:'8850101001',active:true},
+  {id:'P002',name:'ผงซักฟอก',category:'ของใช้ในบ้าน',price:55,cost:35,stock:40,minStock:10,unit:'ถุง',image:'🧺',barcode:'8850101002',active:true},
+  {id:'P003',name:'น้ำยาปรับผ้านุ่ม',category:'ของใช้ในบ้าน',price:45,cost:28,stock:30,minStock:8,unit:'ขวด',image:'🫧',barcode:'8850101003',active:true},
+  {id:'P004',name:'น้ำปลา',category:'อาหารและเครื่องปรุง',price:28,cost:16,stock:60,minStock:15,unit:'ขวด',image:'🍶',barcode:'8850102001',active:true},
+  {id:'P005',name:'น้ำมันพืช',category:'อาหารและเครื่องปรุง',price:65,cost:45,stock:40,minStock:10,unit:'ขวด',image:'🫙',barcode:'8850102002',active:true},
+  {id:'P006',name:'น้ำพริกปลาทู',category:'อาหารและเครื่องปรุง',price:45,cost:25,stock:30,minStock:5,unit:'กระปุก',image:'🌶️',barcode:'8850102003',active:true},
+  {id:'P007',name:'กะปิ',category:'อาหารและเครื่องปรุง',price:30,cost:18,stock:25,minStock:5,unit:'กระปุก',image:'🦐',barcode:'8850102004',active:true},
+  {id:'P008',name:'น้ำดื่มบรรจุขวด',category:'เครื่องดื่มไม่มีแอลกอฮอล์',price:8,cost:4,stock:120,minStock:24,unit:'ขวด',image:'💧',barcode:'8850103001',active:true},
+  {id:'P009',name:'น้ำอัดลม',category:'เครื่องดื่มไม่มีแอลกอฮอล์',price:15,cost:9,stock:72,minStock:12,unit:'กระป๋อง',image:'🥤',barcode:'8850103002',active:true},
+  {id:'P010',name:'ชาสมุนไพรรวม',category:'เครื่องดื่มไม่มีแอลกอฮอล์',price:120,cost:70,stock:22,minStock:8,unit:'กล่อง',image:'🍵',barcode:'8850103003',active:true},
+  {id:'P011',name:'เบียร์ช้าง',category:'เครื่องดื่มมีแอลกอฮอล์',price:55,cost:40,stock:48,minStock:12,unit:'กระป๋อง',image:'🍺',barcode:'8850104001',active:true},
+  {id:'P012',name:'ไวน์ข้าว',category:'เครื่องดื่มมีแอลกอฮอล์',price:150,cost:90,stock:20,minStock:5,unit:'ขวด',image:'🍷',barcode:'8850104002',active:true},
+  {id:'P013',name:'พาราเซตามอล',category:'ยาสามัญประจำบ้าน',price:25,cost:12,stock:100,minStock:20,unit:'แผง',image:'💊',barcode:'8850105001',active:true},
+  {id:'P014',name:'ยาธาตุน้ำขาว',category:'ยาสามัญประจำบ้าน',price:30,cost:18,stock:40,minStock:10,unit:'ขวด',image:'🏥',barcode:'8850105002',active:true},
+  {id:'P015',name:'ยาหม่อง',category:'ยาสามัญประจำบ้าน',price:35,cost:20,stock:30,minStock:8,unit:'กระปุก',image:'🩺',barcode:'8850105003',active:true},
+  {id:'P016',name:'หมูสด',category:'เนื้อสัตว์',price:120,cost:90,stock:20,minStock:5,unit:'กก.',image:'🥩',barcode:'8850106001',active:true},
+  {id:'P017',name:'ไก่สด',category:'เนื้อสัตว์',price:80,cost:60,stock:15,minStock:5,unit:'กก.',image:'🍗',barcode:'8850106002',active:true},
+  {id:'P018',name:'ปลาสด',category:'เนื้อสัตว์',price:90,cost:65,stock:10,minStock:3,unit:'กก.',image:'🐟',barcode:'8850106003',active:true},
+  {id:'P019',name:'กล้วยน้ำว้า',category:'ผลไม้',price:30,cost:18,stock:50,minStock:10,unit:'หวี',image:'🍌',barcode:'8850107001',active:true},
+  {id:'P020',name:'มะม่วง',category:'ผลไม้',price:50,cost:30,stock:30,minStock:8,unit:'กก.',image:'🥭',barcode:'8850107002',active:true},
+  {id:'P021',name:'ส้มเขียวหวาน',category:'ผลไม้',price:60,cost:38,stock:25,minStock:8,unit:'กก.',image:'🍊',barcode:'8850107003',active:true},
+  {id:'P022',name:'ผักบุ้ง',category:'ผัก',price:15,cost:8,stock:40,minStock:10,unit:'กก.',image:'🥬',barcode:'8850108001',active:true},
+  {id:'P023',name:'ถั่วฝักยาว',category:'ผัก',price:20,cost:12,stock:30,minStock:8,unit:'กก.',image:'🫘',barcode:'8850108002',active:true},
+  {id:'P024',name:'กะหล่ำปลี',category:'ผัก',price:18,cost:10,stock:25,minStock:8,unit:'กก.',image:'🥦',barcode:'8850108003',active:true},
+  {id:'P025',name:'ข้าวกล้องอินทรีย์',category:'ข้าวสาร',price:85,cost:55,stock:50,minStock:10,unit:'กก.',image:'🌾',barcode:'8850109001',active:true},
+  {id:'P026',name:'ข้าวหอมมะลิ',category:'ข้าวสาร',price:55,cost:38,stock:80,minStock:20,unit:'กก.',image:'🍚',barcode:'8850109002',active:true},
+  {id:'P027',name:'ข้าวเหนียว',category:'ข้าวสาร',price:45,cost:30,stock:60,minStock:15,unit:'กก.',image:'🍙',barcode:'8850109003',active:true},
+  {id:'P028',name:'กระทะอลูมิเนียม',category:'ของใช้ในครัว',price:180,cost:110,stock:15,minStock:3,unit:'ใบ',image:'🍳',barcode:'8850110001',active:true},
+  {id:'P029',name:'ช้อนส้อมสแตนเลส',category:'ของใช้ในครัว',price:25,cost:15,stock:50,minStock:10,unit:'ชิ้น',image:'🍴',barcode:'8850110002',active:true},
+  {id:'P030',name:'ถ้วยชามเมลามีน',category:'ของใช้ในครัว',price:35,cost:20,stock:30,minStock:8,unit:'ใบ',image:'🍽️',barcode:'8850110003',active:true},
+  {id:'P031',name:'แชมพู',category:'ของใช้ส่วนตัว',price:80,cost:52,stock:30,minStock:8,unit:'ขวด',image:'🧴',barcode:'8850111001',active:true},
+  {id:'P032',name:'สบู่ก้อน',category:'ของใช้ส่วนตัว',price:20,cost:12,stock:60,minStock:15,unit:'ก้อน',image:'🧼',barcode:'8850111002',active:true},
+  {id:'P033',name:'แปรงสีฟัน',category:'ของใช้ส่วนตัว',price:25,cost:14,stock:40,minStock:10,unit:'ด้าม',image:'🪥',barcode:'8850111003',active:true},
+  {id:'P034',name:'ผ้าอ้อมสำเร็จรูป',category:'แม่และเด็ก',price:180,cost:130,stock:20,minStock:5,unit:'แพ็ค',image:'👶',barcode:'8850112001',active:true},
+  {id:'P035',name:'นมผงสำหรับเด็ก',category:'แม่และเด็ก',price:350,cost:260,stock:15,minStock:5,unit:'กระป๋อง',image:'🍼',barcode:'8850112002',active:true},
+  {id:'P036',name:'กระดาษ A4',category:'ของใช้สำนักงาน',price:120,cost:85,stock:20,minStock:5,unit:'รีม',image:'📄',barcode:'8850113001',active:true},
+  {id:'P037',name:'ปากกาลูกลื่น',category:'ของใช้สำนักงาน',price:8,cost:4,stock:100,minStock:20,unit:'ด้าม',image:'🖊️',barcode:'8850113002',active:true},
+  {id:'P038',name:'หลอดไฟ LED',category:'เครื่องใช้ไฟฟ้า',price:85,cost:55,stock:20,minStock:5,unit:'หลอด',image:'💡',barcode:'8850114001',active:true},
+  {id:'P039',name:'ถ่านไฟฉาย AA',category:'เครื่องใช้ไฟฟ้า',price:30,cost:18,stock:50,minStock:10,unit:'แพ็ค',image:'🔋',barcode:'8850114002',active:true},
+  {id:'P040',name:'อาหารสุนัข',category:'อาหารสัตว์',price:120,cost:80,stock:20,minStock:5,unit:'กก.',image:'🐕',barcode:'8850115001',active:true},
+  {id:'P041',name:'อาหารแมว',category:'อาหารสัตว์',price:95,cost:62,stock:20,minStock:5,unit:'กก.',image:'🐈',barcode:'8850115002',active:true},
+  {id:'P042',name:'อาหารปลา',category:'อาหารสัตว์',price:35,cost:20,stock:30,minStock:8,unit:'ถุง',image:'🐠',barcode:'8850115003',active:true},
+  {id:'P043',name:'ปุ๋ยอินทรีย์',category:'ปุ๋ย',price:150,cost:95,stock:30,minStock:8,unit:'กก.',image:'🌱',barcode:'8850116001',active:true},
+  {id:'P044',name:'ปุ๋ยเคมี 16-16-16',category:'ปุ๋ย',price:380,cost:280,stock:20,minStock:5,unit:'กระสอบ',image:'🌿',barcode:'8850116002',active:true},
+  {id:'P045',name:'ยาฆ่าแมลง',category:'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์',price:120,cost:80,stock:15,minStock:5,unit:'ขวด',image:'🧪',barcode:'8850117001',active:true},
+  {id:'P046',name:'ยาฆ่าหญ้า',category:'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์',price:95,cost:62,stock:15,minStock:5,unit:'ขวด',image:'🌾',barcode:'8850117002',active:true},
+  {id:'P047',name:'วัคซีนสัตว์',category:'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์',price:200,cost:140,stock:10,minStock:3,unit:'ขวด',image:'💉',barcode:'8850117003',active:true},
+  {id:'P048',name:'ถุงพลาสติก',category:'อื่น ๆ',price:15,cost:8,stock:50,minStock:10,unit:'แพ็ค',image:'🛍️',barcode:'8850118001',active:true},
+  {id:'P049',name:'เชือกฟาง',category:'อื่น ๆ',price:25,cost:15,stock:30,minStock:8,unit:'ม้วน',image:'🪢',barcode:'8850118002',active:true},
 ];
 
 const DEFAULT_SETTINGS = {
-  shopName: 'วิสาหกิจชุมชนบ้านกันแสง',
-  phone: '08X-XXX-XXXX',
-  address: 'บ้านกันแสง อ.กันทรารมย์ จ.ศรีสะเกษ',
-  promptpay: '0812345678',
-  taxId: '',
-  lowStockAlert: 10,
+  shopName:'วิสาหกิจชุมชนบ้านกันแสง',
+  phone:'08X-XXX-XXXX',
+  address:'บ้านกันแสง อ.กันทรารมย์ จ.ศรีสะเกษ',
+  promptpay:'0812345678',
+  lowStockAlert:10,
 };
 
-// ===== INIT =====
-function initStore() {
-  if (!localStorage.getItem(KEYS.PRODUCTS)) {
-    localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(DEFAULT_PRODUCTS));
+// ===== Firebase REST API helpers =====
+async function fbGet(path) {
+  const res = await fetch(FIREBASE_URL + path + '.json');
+  return res.json();
+}
+async function fbSet(path, data) {
+  await fetch(FIREBASE_URL + path + '.json', {
+    method:'PUT', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+}
+async function fbPush(path, data) {
+  const res = await fetch(FIREBASE_URL + path + '.json', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+  return res.json();
+}
+async function fbPatch(path, data) {
+  await fetch(FIREBASE_URL + path + '.json', {
+    method:'PATCH', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+}
+async function fbDelete(path) {
+  await fetch(FIREBASE_URL + path + '.json', {method:'DELETE'});
+}
+
+// ===== Cache ในหน่วยความจำ =====
+let _products = null;
+let _orders = null;
+let _settings = null;
+
+// ===== INIT — โหลดข้อมูลจาก Firebase ครั้งแรก =====
+async function initStore() {
+  // โหลดสินค้า
+  let prods = await fbGet('/products');
+  if (!prods) {
+    // ยังไม่มีข้อมูล — บันทึกสินค้าตัวอย่างขึ้น Firebase
+    const prodObj = {};
+    DEFAULT_PRODUCTS.forEach(p => { prodObj[p.id] = p; });
+    await fbSet('/products', prodObj);
+    _products = DEFAULT_PRODUCTS;
+  } else {
+    _products = Object.values(prods);
   }
-  if (!localStorage.getItem(KEYS.ORDERS)) {
-    localStorage.setItem(KEYS.ORDERS, JSON.stringify([]));
-  }
-  if (!localStorage.getItem(KEYS.SETTINGS)) {
-    localStorage.setItem(KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
-  }
+  // โหลดออเดอร์
+  let orders = await fbGet('/orders');
+  _orders = orders ? Object.values(orders).sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)) : [];
+  // โหลดตั้งค่า
+  let settings = await fbGet('/settings');
+  _settings = settings || DEFAULT_SETTINGS;
+  if (!settings) await fbSet('/settings', DEFAULT_SETTINGS);
+  window.dispatchEvent(new CustomEvent('storeReady'));
 }
 
 // ===== PRODUCTS =====
-function getProducts(activeOnly = false) {
-  const p = JSON.parse(localStorage.getItem(KEYS.PRODUCTS) || '[]');
-  return activeOnly ? p.filter(x => x.active) : p;
-}
-function saveProducts(products) {
-  localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(products));
-  window.dispatchEvent(new CustomEvent('stockUpdated'));
+function getProducts(activeOnly=false) {
+  if (!_products) return [];
+  return activeOnly ? _products.filter(p=>p.active) : _products;
 }
 function getProduct(id) {
-  return getProducts().find(p => p.id === id);
+  return (_products||[]).find(p=>p.id===id);
 }
-function updateProduct(updated) {
-  const all = getProducts();
-  const idx = all.findIndex(p => p.id === updated.id);
-  if (idx >= 0) { all[idx] = updated; saveProducts(all); return true; }
-  return false;
+async function saveProducts(products) {
+  _products = products;
+  const obj = {};
+  products.forEach(p => { obj[p.id] = p; });
+  await fbSet('/products', obj);
+  window.dispatchEvent(new CustomEvent('stockUpdated'));
 }
-function addProduct(product) {
-  const all = getProducts();
-  product.id = 'P' + String(Date.now()).slice(-6);
-  all.push(product);
-  saveProducts(all);
+async function updateProduct(updated) {
+  const all = getProducts().map(p=>p.id===updated.id?updated:p);
+  await saveProducts(all);
+}
+async function addProduct(product) {
+  product.id = 'P'+Date.now().toString().slice(-6);
+  _products = [...(_products||[]), product];
+  await fbSet('/products/'+product.id, product);
+  window.dispatchEvent(new CustomEvent('stockUpdated'));
   return product;
 }
-function deleteProduct(id) {
-  const all = getProducts().map(p => p.id === id ? {...p, active: false} : p);
-  saveProducts(all);
+async function deleteProductFB(id) {
+  _products = (_products||[]).filter(p=>p.id!==id);
+  await fbDelete('/products/'+id);
+  window.dispatchEvent(new CustomEvent('stockUpdated'));
 }
 
 // ===== STOCK =====
-function deductStock(items) {
-  // items = [{id, qty}]
+async function deductStock(items) {
   const all = getProducts();
   const errors = [];
   for (const item of items) {
-    const p = all.find(x => x.id === item.id);
-    if (!p) { errors.push(`ไม่พบสินค้า ${item.id}`); continue; }
-    if (p.stock < item.qty) { errors.push(`${p.name} สต็อกไม่พอ (เหลือ ${p.stock})`); continue; }
+    const p = all.find(x=>x.id===item.id);
+    if (!p) { errors.push('ไม่พบสินค้า '+item.id); continue; }
+    if (p.stock < item.qty) { errors.push(p.name+' สต็อกไม่พอ (เหลือ '+p.stock+')'); continue; }
     p.stock -= item.qty;
   }
-  if (errors.length) return { ok: false, errors };
-  saveProducts(all);
-  return { ok: true };
+  if (errors.length) return {ok:false,errors};
+  await saveProducts(all);
+  return {ok:true};
 }
-function addStock(id, qty) {
+async function addStock(id, qty) {
   const all = getProducts();
-  const p = all.find(x => x.id === id);
+  const p = all.find(x=>x.id===id);
   if (!p) return false;
   p.stock += qty;
-  saveProducts(all);
+  await saveProducts(all);
   return true;
 }
 function getLowStock() {
-  return getProducts(true).filter(p => p.stock <= p.minStock);
+  return getProducts(true).filter(p=>p.stock<=p.minStock);
 }
 
 // ===== ORDERS =====
-function getOrders() {
-  return JSON.parse(localStorage.getItem(KEYS.ORDERS) || '[]');
-}
-function saveOrders(orders) {
-  localStorage.setItem(KEYS.ORDERS, JSON.stringify(orders));
-  window.dispatchEvent(new CustomEvent('ordersUpdated'));
-}
-function addOrder(order) {
-  const orders = getOrders();
-  order.id = 'ORD' + Date.now();
+function getOrders() { return _orders || []; }
+async function addOrder(order) {
+  order.id = 'ORD'+Date.now();
   order.createdAt = new Date().toISOString();
-  order.status = order.status || 'pending';
-  orders.unshift(order);
-  saveOrders(orders);
+  order.status = order.status||'pending';
+  _orders = [order, ...(_orders||[])];
+  await fbSet('/orders/'+order.id, order);
+  window.dispatchEvent(new CustomEvent('ordersUpdated'));
   return order;
 }
-function updateOrderStatus(orderId, status) {
-  const orders = getOrders();
-  const o = orders.find(x => x.id === orderId);
-  if (o) { o.status = status; o.updatedAt = new Date().toISOString(); saveOrders(orders); }
+async function updateOrderStatus(orderId, status) {
+  const o = (_orders||[]).find(x=>x.id===orderId);
+  if (o) {
+    o.status = status;
+    o.updatedAt = new Date().toISOString();
+    await fbPatch('/orders/'+orderId, {status, updatedAt:o.updatedAt});
+    window.dispatchEvent(new CustomEvent('ordersUpdated'));
+  }
 }
 
 // ===== SETTINGS =====
-function getSettings() {
-  return JSON.parse(localStorage.getItem(KEYS.SETTINGS) || '{}');
-}
-function saveSettings(s) {
-  localStorage.setItem(KEYS.SETTINGS, JSON.stringify(s));
+function getSettings() { return _settings || DEFAULT_SETTINGS; }
+async function saveSettings(s) {
+  _settings = s;
+  await fbSet('/settings', s);
 }
 
 // ===== CATEGORIES =====
 function getCategories() {
-  const cats = [...new Set(getProducts().map(p => p.category))];
-  return cats;
+  const fromProds = getProducts().map(p=>p.category);
+  return [...new Set([...ALL_CATEGORIES,...fromProds])];
 }
 
 // ===== STATS =====
 function getTodayStats() {
   const today = new Date().toDateString();
-  const orders = getOrders().filter(o =>
-    new Date(o.createdAt).toDateString() === today && o.status !== 'cancelled'
-  );
-  const revenue = orders.reduce((s, o) => s + (o.total || 0), 0);
-  const profit = orders.reduce((s, o) => s + (o.profit || 0), 0);
-  return { orders: orders.length, revenue, profit };
+  const orders = getOrders().filter(o=>new Date(o.createdAt).toDateString()===today&&o.status!=='cancelled');
+  return {orders:orders.length, revenue:orders.reduce((s,o)=>s+(o.total||0),0), profit:orders.reduce((s,o)=>s+(o.profit||0),0)};
 }
-
 function getMonthStats() {
   const now = new Date();
-  const orders = getOrders().filter(o => {
-    const d = new Date(o.createdAt);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && o.status !== 'cancelled';
+  const orders = getOrders().filter(o=>{
+    const d=new Date(o.createdAt);
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()&&o.status!=='cancelled';
   });
-  const revenue = orders.reduce((s, o) => s + (o.total || 0), 0);
-  const profit = orders.reduce((s, o) => s + (o.profit || 0), 0);
-  return { orders: orders.length, revenue, profit };
+  return {orders:orders.length, revenue:orders.reduce((s,o)=>s+(o.total||0),0), profit:orders.reduce((s,o)=>s+(o.profit||0),0)};
 }
 
 // ===== FORMAT =====
-function formatMoney(n) { return '฿' + Number(n).toLocaleString('th-TH', {minimumFractionDigits: 0}); }
-function formatDate(iso) {
-  return new Date(iso).toLocaleString('th-TH', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+function formatMoney(n){return '฿'+Number(n).toLocaleString('th-TH');}
+function formatDate(iso){return new Date(iso).toLocaleString('th-TH',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+
+// ===== Real-Time Sync (polling ทุก 5 วินาที) =====
+let _syncInterval = null;
+function startSync() {
+  if (_syncInterval) return;
+  _syncInterval = setInterval(async () => {
+    const [prods, orders] = await Promise.all([fbGet('/products'), fbGet('/orders')]);
+    if (prods) {
+      const newProds = Object.values(prods);
+      const changed = JSON.stringify(newProds) !== JSON.stringify(_products);
+      if (changed) { _products = newProds; window.dispatchEvent(new CustomEvent('stockUpdated')); }
+    }
+    if (orders) {
+      const newOrders = Object.values(orders).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+      const changed = JSON.stringify(newOrders) !== JSON.stringify(_orders);
+      if (changed) { _orders = newOrders; window.dispatchEvent(new CustomEvent('ordersUpdated')); }
+    }
+  }, 5000);
 }
 
-// Init on load
-initStore();
+// Init
+async function boot(){
+  showLoading(true);
+  await initStore();
+  showLoading(false);
+  startSync();
+  if(typeof onStoreReady==="function") onStoreReady();
+}
+boot();
 
 </script>
 <script>
@@ -675,8 +785,12 @@ window.addEventListener('stockUpdated', () => {
 });
 
 // INIT
-renderCategories();
-renderProducts();
+function onStoreReady(){
+  renderCategories();
+  renderProducts();
+  updateTodayStat();
+}
+// INIT (handled by boot())
 </script>
 
 // Mobile cart toggle
