@@ -94,68 +94,6 @@ tr:hover td{background:#FAFCFA}
 .low-alert{background:var(--amber-p);border:1px solid #FFCC80;border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem}
 .low-alert .icon{font-size:1.5rem}
 .low-alert p{font-size:.875rem;color:var(--amber);font-weight:600}
-
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .topbar { padding: .5rem 1rem; flex-wrap: wrap; gap: .4rem; }
-  .topbar h1 { font-size: .85rem; flex: 1 1 100%; order: -1; }
-  .tb-nav { display: none; }
-
-  /* Sidebar becomes horizontal tab bar */
-  .layout { grid-template-columns: 1fr; }
-  .sidebar {
-    padding: 0; border-right: none;
-    border-bottom: 2px solid var(--border);
-    display: flex; overflow-x: auto; gap: 0;
-  }
-  .sidebar::-webkit-scrollbar { height: 3px; }
-  .sb-section { display: flex; margin-bottom: 0; white-space: nowrap; }
-  .sb-label { display: none; }
-  .sb-item {
-    padding: .65rem 1rem; font-size: .8rem; border-left: none;
-    border-bottom: 3px solid transparent; white-space: nowrap; flex-shrink: 0;
-  }
-  .sb-item.active { border-bottom-color: var(--green); border-left: none; background: var(--green-p); }
-
-  /* Main content */
-  .main { padding: .75rem; }
-  .stat-grid { grid-template-columns: repeat(2, 1fr); gap: .6rem; }
-  .stat-card { padding: .9rem 1rem; }
-  .stat-card .value { font-size: 1.3rem; }
-
-  /* Table: card-style on mobile */
-  table { display: block; }
-  thead { display: none; }
-  tbody { display: block; }
-  tr {
-    display: flex; flex-direction: column;
-    background: var(--white); border-radius: var(--r);
-    border: 1px solid var(--border); margin-bottom: .75rem;
-    padding: .85rem; box-shadow: var(--shadow);
-  }
-  td {
-    display: flex; align-items: center; gap: .5rem;
-    border-bottom: none !important; padding: .25rem 0;
-    font-size: .82rem;
-  }
-  td:first-child { font-size: .9rem; font-weight: 700; margin-bottom: .25rem; }
-  td:before {
-    content: attr(data-label);
-    font-size: .7rem; font-weight: 700; color: var(--text3);
-    min-width: 70px; text-transform: uppercase;
-  }
-  td:last-child { margin-top: .5rem; justify-content: flex-start; }
-
-  /* Form modal */
-  .modal { padding: 1.25rem; }
-  .form-grid { grid-template-columns: 1fr; gap: .6rem; }
-
-  /* Low alert */
-  .low-alert { padding: .75rem 1rem; }
-}
-@media (max-width: 480px) {
-  .stat-grid { grid-template-columns: 1fr 1fr; }
-}
 </style>
 </head>
 <body>
@@ -238,26 +176,80 @@ tr:hover td{background:#FAFCFA}
 
     <!-- STOCK IN PAGE -->
     <div class="page" id="page-stock">
-      <div class="table-card">
-        <div class="table-head"><h3>📥 รับสินค้าเข้า</h3></div>
-        <div style="padding:1.5rem">
-          <div class="form-row"><label>เลือกสินค้า</label>
-            <select id="stock-product" style="width:100%;padding:.65rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none"></select>
+      <!-- ฟอร์มรับสินค้าเข้า -->
+      <div class="table-card" style="margin-bottom:1.25rem">
+        <div class="table-head"><h3>📥 บันทึกรับสินค้าเข้า</h3></div>
+        <div style="padding:1.25rem 1.5rem 1.5rem">
+
+          <!-- ขั้นตอนที่ 1: เลือกหมวดหมู่ -->
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">
+            <span style="background:var(--green);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0">1</span>
+            <label style="font-size:.82rem;font-weight:700;color:var(--text2)">เลือกหมวดหมู่</label>
+          </div>
+          <select id="stock-cat" onchange="filterStockProducts()"
+            style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none;margin-bottom:1rem;transition:.2s">
+            <option value="">-- ทุกหมวดหมู่ --</option>
+          </select>
+
+          <!-- ขั้นตอนที่ 2: ค้นหา + เลือกสินค้า -->
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">
+            <span style="background:var(--green);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0">2</span>
+            <label style="font-size:.82rem;font-weight:700;color:var(--text2)">ค้นหา / เลือกสินค้า</label>
+          </div>
+          <input type="text" id="stock-search" placeholder="พิมพ์ชื่อสินค้าเพื่อค้นหา..." oninput="filterStockProducts()"
+            style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none;margin-bottom:.6rem;transition:.2s">
+          <select id="stock-product" size="6" onchange="updateStockPreview()"
+            style="width:100%;padding:.4rem;border:1.5px solid var(--green);border-radius:var(--r);font-family:var(--font);font-size:.875rem;outline:none;margin-bottom:1rem;background:white">
+          </select>
+
+          <!-- preview สินค้าที่เลือก -->
+          <div id="stock-preview" style="display:none;background:var(--green-p);border:1px solid var(--green-l);border-radius:var(--r);padding:.85rem 1rem;margin-bottom:1rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+              <div>
+                <span id="prev-name" style="font-weight:700;font-size:.95rem"></span>
+                <span id="prev-cat" style="font-size:.75rem;color:var(--text2);margin-left:.5rem"></span>
+              </div>
+              <div style="display:flex;gap:1.5rem;font-size:.85rem">
+                <span>คงเหลือ: <strong id="prev-stock" style="color:var(--green)"></strong></span>
+                <span>ต่ำสุด: <strong id="prev-min"></strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ขั้นตอนที่ 3: จำนวน + หมายเหตุ -->
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">
+            <span style="background:var(--green);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0">3</span>
+            <label style="font-size:.82rem;font-weight:700;color:var(--text2)">ระบุจำนวนและหมายเหตุ</label>
           </div>
           <div class="form-grid">
-            <div class="form-row"><label>จำนวนที่รับเข้า</label><input type="number" id="stock-qty" min="1" value="1" placeholder="จำนวน"></div>
-            <div class="form-row"><label>หมายเหตุ</label><input type="text" id="stock-note" placeholder="เช่น รับจากซัพพลายเออร์"></div>
+            <div class="form-row">
+              <label>จำนวนที่รับเข้า *</label>
+              <input type="number" id="stock-qty" min="1" value="1" placeholder="จำนวน">
+            </div>
+            <div class="form-row">
+              <label>หมายเหตุ</label>
+              <input type="text" id="stock-note" placeholder="เช่น รับจากซัพพลายเออร์">
+            </div>
           </div>
-          <button class="btn btn-green" onclick="doAddStock()" style="margin-top:.5rem">✓ บันทึกรับสินค้าเข้า</button>
+
+          <button class="btn btn-green" onclick="doAddStock()" style="margin-top:.75rem;width:100%;justify-content:center;padding:.85rem;font-size:1rem">
+            ✅ บันทึกรับสินค้าเข้า
+          </button>
         </div>
-        <div style="padding:0 1.5rem 1.5rem">
-          <div style="font-size:.85rem;font-weight:700;color:var(--text2);margin-bottom:.75rem">สต็อกปัจจุบัน</div>
-          <div style="overflow-x:auto">
-            <table>
-              <thead><tr><th>สินค้า</th><th>หมวดหมู่</th><th>คงเหลือ</th><th>ต่ำสุด</th><th>สถานะ</th></tr></thead>
-              <tbody id="stock-tbody"></tbody>
-            </table>
-          </div>
+      </div>
+
+      <!-- ตารางสต็อกปัจจุบัน -->
+      <div class="table-card">
+        <div class="table-head">
+          <h3>📋 สต็อกปัจจุบัน</h3>
+          <input type="text" id="stock-table-search" placeholder="ค้นหาสินค้า..." oninput="renderStockTable()"
+            style="padding:.4rem .85rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.82rem;outline:none;width:200px">
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>สินค้า</th><th>หมวดหมู่</th><th>คงเหลือ</th><th>ต่ำสุด</th><th>สถานะ</th></tr></thead>
+            <tbody id="stock-tbody"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -667,10 +659,57 @@ function renderOrders() {
 
 // STOCK PAGE
 function renderStockPage() {
-  const prods = getProducts(true);
+  // populate หมวดหมู่ dropdown
+  const catSel = document.getElementById('stock-cat');
+  const savedCat = catSel.value;
+  catSel.innerHTML = '<option value="">-- ทุกหมวดหมู่ --</option>' +
+    ALL_CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+  catSel.value = savedCat;
+  filterStockProducts();
+  renderStockTable();
+}
+
+function filterStockProducts() {
+  const cat = document.getElementById('stock-cat').value;
+  const q = (document.getElementById('stock-search').value || '').toLowerCase();
+  let prods = getProducts(true);
+  if (cat) prods = prods.filter(p => p.category === cat);
+  if (q) prods = prods.filter(p => p.name.toLowerCase().includes(q));
   const sel = document.getElementById('stock-product');
-  sel.innerHTML = prods.map(p => `<option value="${p.id}">${p.image} ${p.name} (เหลือ: ${p.stock} ${p.unit})</option>`).join('');
-  document.getElementById('stock-tbody').innerHTML = getProducts().map(p => {
+  const prevVal = sel.value;
+  sel.innerHTML = prods.length
+    ? prods.map(p => {
+        const low = p.stock <= p.minStock && p.stock > 0;
+        const out = p.stock <= 0;
+        const flag = out ? ' ❌' : low ? ' ⚠️' : '';
+        return `<option value="${p.id}">${p.image} ${p.name}${flag}  (เหลือ: ${p.stock} ${p.unit})  |  ${p.category}</option>`;
+      }).join('')
+    : '<option value="">-- ไม่พบสินค้า --</option>';
+  // คืนค่าที่เลือกไว้ถ้ายังอยู่ใน list
+  if (prevVal && prods.find(p => p.id === prevVal)) sel.value = prevVal;
+  else if (prods.length) sel.value = prods[0].id;
+  updateStockPreview();
+}
+
+function updateStockPreview() {
+  const id = document.getElementById('stock-product').value;
+  const p = id ? getProduct(id) : null;
+  const box = document.getElementById('stock-preview');
+  if (!p) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  document.getElementById('prev-name').textContent = p.image + ' ' + p.name;
+  document.getElementById('prev-cat').textContent = p.category;
+  const stockEl = document.getElementById('prev-stock');
+  stockEl.textContent = p.stock + ' ' + p.unit;
+  stockEl.style.color = p.stock <= 0 ? 'var(--red)' : p.stock <= p.minStock ? 'var(--amber)' : 'var(--green)';
+  document.getElementById('prev-min').textContent = p.minStock + ' ' + p.unit;
+}
+
+function renderStockTable() {
+  const q = (document.getElementById('stock-table-search')?.value || '').toLowerCase();
+  let prods = getProducts();
+  if (q) prods = prods.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+  document.getElementById('stock-tbody').innerHTML = prods.map(p => {
     const low = p.stock <= p.minStock;
     return `<tr>
       <td>${p.image} <strong>${p.name}</strong></td>
@@ -681,15 +720,35 @@ function renderStockPage() {
     </tr>`;
   }).join('');
 }
+
 function doAddStock() {
   const id = document.getElementById('stock-product').value;
   const qty = parseInt(document.getElementById('stock-qty').value) || 0;
-  if (!qty || qty < 1) { alert('กรุณาระบุจำนวน'); return; }
+  const note = document.getElementById('stock-note').value || '';
+  if (!id) { alert('กรุณาเลือกสินค้า'); return; }
+  if (!qty || qty < 1) { alert('กรุณาระบุจำนวนที่รับเข้า'); return; }
+  const p = getProduct(id);
   addStock(id, qty);
-  alert('✅ บันทึกรับสินค้าเข้าแล้ว');
+  // แสดง toast แทน alert
+  showStockToast(`✅ รับเข้า ${p.image} ${p.name} จำนวน ${qty} ${p.unit} สำเร็จ`);
   document.getElementById('stock-qty').value = 1;
+  document.getElementById('stock-note').value = '';
   renderStockPage();
   renderOverview();
+}
+
+function showStockToast(msg) {
+  let t = document.getElementById('stock-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'stock-toast';
+    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:.85rem 1.75rem;border-radius:var(--r);font-weight:700;font-size:.9rem;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:opacity .3s';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.style.opacity = '0', 2800);
 }
 
 // LOW STOCK
@@ -736,30 +795,5 @@ renderProductTable();
 window.addEventListener('stockUpdated', () => { renderOverview(); renderProductTable(); });
 window.addEventListener('ordersUpdated', () => { renderOrders(); renderOverview(); });
 </script>
-
-// Add data-label to table cells for mobile card view
-(function(){
-  function labelTableCells(){
-    document.querySelectorAll('table').forEach(function(tbl){
-      var headers = Array.from(tbl.querySelectorAll('th')).map(th => th.textContent.trim());
-      if(!headers.length) return;
-      tbl.querySelectorAll('tbody tr').forEach(function(row){
-        Array.from(row.querySelectorAll('td')).forEach(function(td, i){
-          if(headers[i]) td.setAttribute('data-label', headers[i]);
-        });
-      });
-    });
-  }
-  // Run after renders
-  var orig = window.renderProductTable;
-  if(typeof orig === 'function'){
-    window.renderProductTable = function(){
-      orig.apply(this, arguments);
-      setTimeout(labelTableCells, 50);
-    };
-  }
-  setTimeout(labelTableCells, 300);
-})();
-
 </body>
 </html>
