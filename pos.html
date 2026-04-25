@@ -100,6 +100,59 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);height:100vh
 .alert.show{display:block}
 .alert.error{background:var(--red)}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  body { overflow: auto; height: auto; }
+  .topbar { padding: .5rem 1rem; flex-wrap: wrap; gap: .4rem; }
+  .topbar h1 { font-size: .85rem; }
+  .topbar .time { font-size: .75rem; }
+  .badge { font-size: .72rem; padding: .2rem .5rem; }
+
+  /* POS layout: stack vertically on mobile */
+  .pos-layout { grid-template-columns: 1fr; height: auto; overflow: visible; }
+
+  /* Products panel */
+  .products-panel { overflow: visible; }
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: .6rem; padding: .75rem;
+    overflow-y: visible; max-height: none;
+  }
+  .product-card { padding: .65rem; }
+  .product-card .emoji { font-size: 1.6rem; margin-bottom: .3rem; }
+  .product-card .pname { font-size: .72rem; }
+  .product-card .price { font-size: .85rem; }
+  .product-card .stock { font-size: .65rem; }
+
+  /* Cart panel: fixed bottom drawer on mobile */
+  .cart-panel {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 56px; border-left: none;
+    border-top: 2px solid var(--green);
+    border-radius: 16px 16px 0 0;
+    z-index: 150; transition: height .3s ease;
+    box-shadow: 0 -4px 20px rgba(0,0,0,.15);
+  }
+  .cart-panel.expanded { height: 85vh; overflow: hidden; }
+  .cart-header { padding: .75rem 1rem; cursor: pointer; }
+  .cart-header h2 { font-size: .9rem; }
+  .cart-items { display: none; }
+  .cart-panel.expanded .cart-items { display: block; }
+  .cart-summary { display: none; }
+  .cart-panel.expanded .cart-summary { display: block; }
+
+  /* Bottom padding so products not hidden behind cart */
+  .products-panel { padding-bottom: 70px; }
+
+  /* Cart toggle button */
+  .cart-toggle-hint {
+    font-size: .72rem; color: var(--text3); margin-left: auto;
+  }
+}
+@media (max-width: 400px) {
+  .products-grid { grid-template-columns: repeat(3, 1fr); }
+}
 </style>
 </head>
 <body>
@@ -625,5 +678,28 @@ window.addEventListener('stockUpdated', () => {
 renderCategories();
 renderProducts();
 </script>
+
+// Mobile cart toggle
+(function(){
+  function isMobile(){ return window.innerWidth <= 768; }
+  var cartPanel = document.querySelector('.cart-panel');
+  var cartHeader = document.querySelector('.cart-header');
+  if(cartPanel && cartHeader){
+    cartHeader.addEventListener('click', function(){
+      if(isMobile()){
+        cartPanel.classList.toggle('expanded');
+      }
+    });
+    // Update header to show hint
+    var hint = document.createElement('span');
+    hint.className = 'cart-toggle-hint';
+    hint.textContent = '▲ แตะเพื่อเปิด';
+    cartHeader.appendChild(hint);
+    cartPanel.addEventListener('transitionend', function(){
+      hint.textContent = cartPanel.classList.contains('expanded') ? '▼ แตะเพื่อปิด' : '▲ แตะเพื่อเปิด';
+    });
+  }
+})();
+
 </body>
 </html>

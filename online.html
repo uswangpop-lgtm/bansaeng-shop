@@ -113,6 +113,49 @@ nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem
 .success-banner .icon{font-size:3rem;display:block;margin-bottom:.5rem}
 .success-banner h3{color:var(--green);font-size:1.2rem;font-weight:700;margin-bottom:.5rem}
 .success-banner p{color:var(--text2);font-size:.875rem}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  nav { padding: 0 1rem; height: 56px; }
+  nav .logo { font-size: .95rem; }
+  .nav-r a { display: none; }
+
+  .banner { padding: 1.75rem 1rem; }
+  .banner h1 { font-size: 1.4rem; }
+  .banner p { font-size: .875rem; }
+  .banner-pills { gap: .4rem; }
+  .bpill { font-size: .72rem; padding: .25rem .65rem; }
+
+  .content { padding: 1rem; }
+  .filter-bar { flex-direction: column; gap: .6rem; }
+  .filter-bar input { min-width: unset; width: 100%; }
+  .cat-pills { gap: .4rem; }
+  .cpill { font-size: .75rem; padding: .3rem .7rem; }
+
+  /* Product grid: 2 columns on mobile */
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+  .p-img { height: 100px; font-size: 3rem; }
+  .p-body { padding: .75rem; }
+  .p-name { font-size: .82rem; }
+  .p-price { font-size: 1rem; }
+  .p-stock { font-size: .7rem; }
+  .btn-add { font-size: .78rem; padding: .5rem; }
+
+  /* Cart sidebar: full screen on mobile */
+  .cart-sidebar { width: 100%; right: -100%; border-radius: 0; }
+  .cart-sidebar.open { right: 0; }
+
+  /* Order modal */
+  .modal { padding: 1.25rem; margin: .5rem; border-radius: 12px; }
+  .ship-options { grid-template-columns: 1fr 1fr; }
+
+  /* Bottom cart button - make sticky */
+  .cart-btn { padding: .45rem 1rem; font-size: .82rem; }
+}
+@media (max-width: 380px) {
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+  .p-img { height: 80px; font-size: 2.5rem; }
+}
 </style>
 </head>
 <body>
