@@ -5,153 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard — บ้านกันแสง</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
-// ===== EXPORT EXCEL =====
-function exportExcel() {
-  const q = (document.getElementById('stock-search-dash')?.value || '').toLowerCase();
-  const cat = document.getElementById('stock-cat-dash')?.value || '';
-  const statusF = document.getElementById('stock-status-filter')?.value || '';
-  let products = getProducts();
-  if (q) products = products.filter(p => p.name.toLowerCase().includes(q));
-  if (cat) products = products.filter(p => p.category === cat);
-  if (statusF === 'out') products = products.filter(p => p.stock <= 0);
-  else if (statusF === 'low') products = products.filter(p => p.stock > 0 && p.stock <= p.minStock);
-  else if (statusF === 'ok') products = products.filter(p => p.stock > p.minStock);
-
-  const settings = getSettings();
-  const now = new Date().toLocaleString('th-TH');
-  const totalVal = products.reduce((s,p) => s + p.stock*p.cost, 0);
-
-  // Build CSV (Excel อ่านได้)
-  const BOM = '\uFEFF'; // UTF-8 BOM สำหรับภาษาไทย
-  const rows = [
-    [`รายงานสต็อกสินค้าคงเหลือ — ${settings.shopName || 'วิสาหกิจชุมชนบ้านกันแสง'}`],
-    [`วันที่พิมพ์: ${now}`],
-    [''],
-    ['รหัส','ชื่อสินค้า','หมวดหมู่','หน่วย','คงเหลือ','สต็อกต่ำสุด','ราคาขาย','ต้นทุน','มูลค่าสต็อก','สถานะ'],
-    ...products.map(p => {
-      const out = p.stock <= 0;
-      const low = p.stock > 0 && p.stock <= p.minStock;
-      return [
-        p.barcode || p.id, p.name, p.category, p.unit,
-        p.stock, p.minStock, p.price, p.cost,
-        p.stock * p.cost,
-        out ? 'หมด' : low ? 'ใกล้หมด' : 'ปกติ'
-      ];
-    }),
-    [''],
-    ['','','','รวม',products.reduce((s,p)=>s+p.stock,0),'','','',totalVal,''],
-  ];
-
-  const csv = BOM + rows.map(row =>
-    row.map(cell => {
-      const s = String(cell ?? '');
-      return s.includes(',') || s.includes('"') || s.includes('\n')
-        ? '"' + s.replace(/"/g,'""') + '"' : s;
-    }).join(',')
-  ).join('\n');
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'stock_' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// ===== EXPORT PDF =====
-function exportPDF() {
-  const settings = getSettings();
-  const q = (document.getElementById('stock-search-dash')?.value || '').toLowerCase();
-  const cat = document.getElementById('stock-cat-dash')?.value || '';
-  const statusF = document.getElementById('stock-status-filter')?.value || '';
-  let products = getProducts();
-  if (q) products = products.filter(p => p.name.toLowerCase().includes(q));
-  if (cat) products = products.filter(p => p.category === cat);
-  if (statusF === 'out') products = products.filter(p => p.stock <= 0);
-  else if (statusF === 'low') products = products.filter(p => p.stock > 0 && p.stock <= p.minStock);
-  else if (statusF === 'ok') products = products.filter(p => p.stock > p.minStock);
-
-  const totalVal = products.reduce((s,p) => s + p.stock*p.cost, 0);
-  const now = new Date().toLocaleString('th-TH');
-
-  const rows = products.map((p,i) => {
-    const out = p.stock <= 0;
-    const low = p.stock > 0 && p.stock <= p.minStock;
-    const color = out ? '#C62828' : low ? '#E65100' : '#2D6A4F';
-    const status = out ? 'หมด' : low ? 'ใกล้หมด' : 'ปกติ';
-    return `<tr style="background:${i%2===0?'#fff':'#f9fdf9'}">
-      <td>${i+1}</td>
-      <td>${p.image} ${p.name}</td>
-      <td>${p.category}</td>
-      <td style="text-align:center"><strong style="color:${color}">${p.stock}</strong> ${p.unit}</td>
-      <td style="text-align:center">${p.minStock}</td>
-      <td style="text-align:right">฿${p.price.toLocaleString()}</td>
-      <td style="text-align:right">฿${p.cost.toLocaleString()}</td>
-      <td style="text-align:right"><strong>฿${(p.stock*p.cost).toLocaleString()}</strong></td>
-      <td style="text-align:center;color:${color};font-weight:700">${status}</td>
-    </tr>`;
-  }).join('');
-
-  const html = `<!DOCTYPE html><html lang="th"><head>
-  <meta charset="UTF-8">
-  <title>รายงานสต็อก</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Sarabun',sans-serif;font-size:11px;color:#1B2D1B;padding:20px}
-    .header{text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #2D6A4F}
-    .header h1{font-size:16px;color:#2D6A4F;margin-bottom:4px}
-    .header p{font-size:10px;color:#666}
-    table{width:100%;border-collapse:collapse;margin-bottom:12px}
-    th{background:#2D6A4F;color:white;padding:6px 8px;text-align:left;font-size:10px}
-    td{padding:5px 8px;border-bottom:1px solid #E8F0E6;font-size:10px}
-    .footer{background:#D8F3DC;font-weight:700;padding:6px 8px}
-    .summary{display:flex;gap:20px;margin-top:12px;padding:10px;background:#F0F8F0;border-radius:8px}
-    .sum-item{text-align:center}
-    .sum-item .val{font-size:14px;font-weight:700;color:#2D6A4F}
-    .sum-item .lbl{font-size:9px;color:#666}
-    @media print{@page{size:A4 landscape;margin:15mm}}
-  </style>
-  </head><body>
-  <div class="header">
-    <h1>📦 รายงานสต็อกสินค้าคงเหลือ</h1>
-    <p>${settings.shopName || 'วิสาหกิจชุมชนบ้านกันแสง'} | ${settings.address || ''} | พิมพ์เมื่อ: ${now}</p>
-  </div>
-  <div class="summary">
-    <div class="sum-item"><div class="val">${products.length}</div><div class="lbl">รายการสินค้า</div></div>
-    <div class="sum-item"><div class="val">${products.reduce((s,p)=>s+p.stock,0).toLocaleString()}</div><div class="lbl">จำนวนรวม</div></div>
-    <div class="sum-item"><div class="val">฿${totalVal.toLocaleString()}</div><div class="lbl">มูลค่าสต็อกรวม</div></div>
-    <div class="sum-item"><div class="val" style="color:#C62828">${products.filter(p=>p.stock<=0).length}</div><div class="lbl">สินค้าหมด</div></div>
-    <div class="sum-item"><div class="val" style="color:#E65100">${products.filter(p=>p.stock>0&&p.stock<=p.minStock).length}</div><div class="lbl">ใกล้หมด</div></div>
-  </div>
-  <br>
-  <table>
-    <thead><tr>
-      <th>#</th><th>สินค้า</th><th>หมวดหมู่</th>
-      <th style="text-align:center">คงเหลือ</th><th style="text-align:center">ต่ำสุด</th>
-      <th style="text-align:right">ราคาขาย</th><th style="text-align:right">ต้นทุน</th>
-      <th style="text-align:right">มูลค่าสต็อก</th><th style="text-align:center">สถานะ</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-    <tfoot><tr class="footer">
-      <td colspan="3">รวมทั้งหมด ${products.length} รายการ</td>
-      <td style="text-align:center">${products.reduce((s,p)=>s+p.stock,0).toLocaleString()}</td>
-      <td colspan="3"></td>
-      <td style="text-align:right">฿${totalVal.toLocaleString()}</td>
-      <td></td>
-    </tr></tfoot>
-  </table>
-  <script>window.onload=function(){window.print();}<\/script>
-  </body></html>`;
-
-  const win = window.open('', '_blank', 'width=1100,height=750');
-  win.document.write(html);
-  win.document.close();
-}
-
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -202,33 +56,20 @@ tr:last-child td{border:none}
 .tab{padding:.45rem 1.1rem;border-radius:20px;font-size:.82rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--text2);font-family:var(--font);transition:.2s}
 .tab.active{background:var(--green);color:white;border-color:var(--green)}
 
-/* ===== EXPORT BUTTONS ===== */
-.export-bar{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:1.5rem;padding:1rem 1.25rem;background:var(--white);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--border)}
-.export-bar h3{font-size:.9rem;font-weight:700;color:var(--text2);flex:1}
-.btn-export{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1.1rem;border-radius:var(--r);border:1.5px solid;font-family:var(--font);font-size:.82rem;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
-.btn-excel{background:#E8F5E9;color:#1B5E20;border-color:#43A047}
-.btn-excel:hover{background:#C8E6C9;transform:translateY(-1px)}
-.btn-pdf{background:#FFEBEE;color:#B71C1C;border-color:#E53935}
-.btn-pdf:hover{background:#FFCDD2;transform:translateY(-1px)}
-.btn-print{background:#E3F2FD;color:#0D47A1;border-color:#1E88E5}
-.btn-print:hover{background:#BBDEFB;transform:translateY(-1px)}
-
-/* สถานะสต็อก filter */
-.stock-filter-bar{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg)}
-.stock-filter-bar input,.stock-filter-bar select{padding:.45rem .85rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.82rem;outline:none;transition:.2s}
-.stock-filter-bar input:focus,.stock-filter-bar select:focus{border-color:var(--green)}
-.stock-filter-bar input{flex:1;min-width:160px}
-
-/* Print styles */
-@media print {
-  nav,.topbar,.tabs,.export-bar,.stock-filter-bar,
-  .chart-grid,.stat-grid { display: none !important; }
-  .content { padding: 0 !important; }
-  .table-card { box-shadow: none !important; border: 1px solid #ccc !important; break-inside: avoid; }
-  .print-header { display: block !important; }
-  body { font-size: 11px; }
-}
-.print-header { display: none; }
+/* ===== EXPORT ===== */
+.export-bar{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;padding:1rem 1.25rem;background:var(--white);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:1.25rem}
+.export-bar .eb-title{font-size:.9rem;font-weight:700;color:var(--text2);flex:1;min-width:120px}
+.eb-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:8px;border:1.5px solid;font-family:var(--font);font-size:.82rem;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.eb-xl{background:#E8F5E9;color:#1B5E20;border-color:#43A047}.eb-xl:hover{background:#C8E6C9}
+.eb-pdf{background:#FFEBEE;color:#B71C1C;border-color:#E53935}.eb-pdf:hover{background:#FFCDD2}
+.eb-pr{background:#E3F2FD;color:#0D47A1;border-color:#1E88E5}.eb-pr:hover{background:#BBDEFB}
+/* Stock filter */
+.sf-bar{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.75rem 1rem;border-bottom:1px solid var(--border)}
+.sf-bar input,.sf-bar select{padding:.42rem .8rem;border:1.5px solid var(--border);border-radius:8px;font-family:var(--font);font-size:.82rem;outline:none;background:white}
+.sf-bar input:focus,.sf-bar select:focus{border-color:var(--green)}
+.sf-bar input{flex:1;min-width:140px}
+.sf-count{font-size:.78rem;color:var(--text3);padding:.3rem .65rem;background:var(--bg);border-radius:20px;white-space:nowrap}
+@media print{.topbar,.tabs,.export-bar,.sf-bar,.chart-grid,.stat-grid{display:none!important}.content{padding:0!important}}
 </style>
 </head>
 <body>
@@ -284,52 +125,40 @@ tr:last-child td{border:none}
 
   <!-- EXPORT BAR -->
   <div class="export-bar">
-    <h3>📤 ส่งออกรายงานสต็อกสินค้า</h3>
-    <button class="btn-export btn-excel" onclick="exportExcel()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-      Export Excel (.xlsx)
-    </button>
-    <button class="btn-export btn-pdf" onclick="exportPDF()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
-      Export PDF
-    </button>
-    <button class="btn-export btn-print" onclick="window.print()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-      พิมพ์
-    </button>
+    <span class="eb-title">📤 ส่งออกรายงานสต็อกสินค้าคงเหลือ</span>
+    <button class="eb-btn eb-xl" onclick="doExportExcel()">📊 Export Excel (.csv)</button>
+    <button class="eb-btn eb-pdf" onclick="doExportPDF()">📄 Export PDF</button>
+    <button class="eb-btn eb-pr" onclick="window.print()">🖨️ พิมพ์</button>
   </div>
 
-  <!-- STOCK STATUS -->
-  <div class="table-card" id="stock-card">
-    <!-- Print Header -->
-    <div class="print-header" style="padding:1rem 1.25rem;border-bottom:1px solid #ccc">
-      <h2 style="font-size:1.1rem;margin-bottom:.25rem">📦 รายงานสต็อกสินค้าคงเหลือ</h2>
-      <div style="font-size:.8rem;color:#666" id="print-date"></div>
-    </div>
-
-    <div class="stock-filter-bar">
-      <input type="text" id="stock-search-dash" placeholder="🔍 ค้นหาสินค้า..." oninput="renderStockStatus()">
-      <select id="stock-cat-dash" onchange="renderStockStatus()">
+  <!-- STOCK TABLE -->
+  <div class="table-card" style="padding:0">
+    <div class="sf-bar">
+      <input type="text" id="sf-q" placeholder="🔍 ค้นหาชื่อสินค้า..." oninput="renderStockStatus()">
+      <select id="sf-cat" onchange="renderStockStatus()">
         <option value="">ทุกหมวดหมู่</option>
       </select>
-      <select id="stock-status-filter" onchange="renderStockStatus()">
+      <select id="sf-st" onchange="renderStockStatus()">
         <option value="">ทุกสถานะ</option>
-        <option value="out">❌ หมด</option>
+        <option value="out">❌ หมดแล้ว</option>
         <option value="low">⚠️ ใกล้หมด</option>
         <option value="ok">✅ ปกติ</option>
       </select>
-      <span id="stock-count" style="font-size:.8rem;color:var(--text3);white-space:nowrap"></span>
+      <span class="sf-count" id="sf-count">-</span>
     </div>
-
     <div style="overflow-x:auto">
-      <table id="stock-table">
+      <table>
         <thead><tr>
           <th>รหัส</th><th>สินค้า</th><th>หมวดหมู่</th>
-          <th>คงเหลือ</th><th>สต็อกต่ำสุด</th>
-          <th>ราคาขาย</th><th>ต้นทุน</th><th>มูลค่าสต็อก</th><th>สถานะ</th>
+          <th style="text-align:center">คงเหลือ</th>
+          <th style="text-align:center">ต่ำสุด</th>
+          <th style="text-align:right">ราคาขาย</th>
+          <th style="text-align:right">ต้นทุน</th>
+          <th style="text-align:right">มูลค่าสต็อก</th>
+          <th style="text-align:center">สถานะ</th>
         </tr></thead>
         <tbody id="stock-status"></tbody>
-        <tfoot id="stock-footer"></tfoot>
+        <tfoot id="stock-foot"></tfoot>
       </table>
     </div>
   </div>
@@ -667,64 +496,160 @@ function renderRecentOrders() {
 }
 
 // STOCK STATUS
+function getFiltered() {
+  const q = (document.getElementById('sf-q')?.value||'').toLowerCase();
+  const cat = document.getElementById('sf-cat')?.value||'';
+  const st = document.getElementById('sf-st')?.value||'';
+  let p = getProducts();
+  if (q) p = p.filter(x => x.name.toLowerCase().includes(q)||(x.barcode||'').includes(q));
+  if (cat) p = p.filter(x => x.category===cat);
+  if (st==='out') p = p.filter(x=>x.stock<=0);
+  else if (st==='low') p = p.filter(x=>x.stock>0&&x.stock<=x.minStock);
+  else if (st==='ok') p = p.filter(x=>x.stock>x.minStock);
+  return p;
+}
+
 function renderStockStatus() {
-  // Populate category dropdown
-  const catSel = document.getElementById('stock-cat-dash');
-  if (catSel && catSel.options.length <= 1) {
-    const cats = [...new Set(getProducts().map(p => p.category))].sort();
-    cats.forEach(cat => {
-      const o = document.createElement('option');
-      o.value = o.textContent = cat;
-      catSel.appendChild(o);
+  // categories dropdown
+  const cs = document.getElementById('sf-cat');
+  if (cs && cs.options.length<=1) {
+    [...new Set(getProducts().map(p=>p.category))].sort().forEach(cat=>{
+      const o=document.createElement('option'); o.value=o.textContent=cat; cs.appendChild(o);
     });
   }
-  const q = (document.getElementById('stock-search-dash')?.value || '').toLowerCase();
-  const cat = document.getElementById('stock-cat-dash')?.value || '';
-  const statusF = document.getElementById('stock-status-filter')?.value || '';
+  const prods = getFiltered();
+  const totalVal = prods.reduce((s,p)=>s+p.stock*p.cost,0);
+  const totalQty = prods.reduce((s,p)=>s+p.stock,0);
+  const outN = prods.filter(p=>p.stock<=0).length;
+  const lowN = prods.filter(p=>p.stock>0&&p.stock<=p.minStock).length;
 
-  let products = getProducts();
-  if (q) products = products.filter(p => p.name.toLowerCase().includes(q) || p.barcode?.includes(q));
-  if (cat) products = products.filter(p => p.category === cat);
-  if (statusF === 'out') products = products.filter(p => p.stock <= 0);
-  else if (statusF === 'low') products = products.filter(p => p.stock > 0 && p.stock <= p.minStock);
-  else if (statusF === 'ok') products = products.filter(p => p.stock > p.minStock);
+  const cnt = document.getElementById('sf-count');
+  if (cnt) cnt.textContent = prods.length+' รายการ | '+formatMoney(totalVal);
 
-  const totalVal = products.reduce((s, p) => s + p.stock * p.cost, 0);
-  const totalQty = products.reduce((s, p) => s + p.stock, 0);
+  document.getElementById('stock-status').innerHTML = prods.length
+    ? prods.map((p,i)=>{
+        const out=p.stock<=0, low=p.stock>0&&p.stock<=p.minStock;
+        const col=out?'var(--red)':low?'var(--amber)':'var(--green)';
+        return `<tr style="background:${i%2?'#FAFCFA':'#fff'}">
+          <td style="font-size:.72rem;color:var(--text3);font-family:monospace">${p.barcode||p.id}</td>
+          <td>${p.image} <strong>${p.name}</strong></td>
+          <td style="font-size:.8rem">${p.category}</td>
+          <td style="text-align:center"><strong style="color:${col}">${p.stock}</strong> <small style="color:var(--text3)">${p.unit}</small></td>
+          <td style="text-align:center;font-size:.82rem">${p.minStock} ${p.unit}</td>
+          <td style="text-align:right">${formatMoney(p.price)}</td>
+          <td style="text-align:right;color:var(--text2)">${formatMoney(p.cost)}</td>
+          <td style="text-align:right"><strong>${formatMoney(p.stock*p.cost)}</strong></td>
+          <td style="text-align:center"><span class="badge ${out?'br':low?'ba':'bg'}">${out?'หมด':low?'ใกล้หมด':'ปกติ'}</span></td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:2rem">ไม่พบสินค้า</td></tr>';
 
-  document.getElementById('stock-count').textContent =
-    `แสดง ${products.length} รายการ | มูลค่ารวม ${formatMoney(totalVal)}`;
+  const foot = document.getElementById('stock-foot');
+  if (foot) foot.innerHTML = `<tr style="background:var(--green-p);color:var(--green);font-weight:700">
+    <td colspan="3" style="padding:.7rem 1rem">รวม ${prods.length} รายการ${outN?' · <span style="color:var(--red)">หมด '+outN+'</span>':''}${lowN?' · <span style="color:var(--amber)">ใกล้หมด '+lowN+'</span>':''}</td>
+    <td style="text-align:center;padding:.7rem 1rem">${totalQty.toLocaleString()}</td>
+    <td colspan="3"></td>
+    <td style="text-align:right;padding:.7rem 1rem;font-size:1rem">${formatMoney(totalVal)}</td>
+    <td></td>
+  </tr>`;
+}
 
-  document.getElementById('stock-status').innerHTML = products.length ? products.map(p => {
-    const low = p.stock <= p.minStock && p.stock > 0;
-    const out = p.stock <= 0;
-    const val = p.stock * p.cost;
-    return `<tr>
-      <td style="font-size:.72rem;color:var(--text3);font-family:monospace">${p.barcode || p.id}</td>
-      <td>${p.image} <strong>${p.name}</strong></td>
+// ===== EXPORT EXCEL =====
+function doExportExcel() {
+  const prods = getFiltered();
+  const s = getSettings();
+  const now = new Date().toLocaleString('th-TH');
+  const totalVal = prods.reduce((sum,p)=>sum+p.stock*p.cost,0);
+  const totalQty = prods.reduce((sum,p)=>sum+p.stock,0);
+  const esc = v => { const x=String(v??''); return (x.includes(',')||x.includes('"'))?'"'+x.replace(/"/g,'""')+'"':x; };
+  const rows = [
+    ['รายงานสต็อกสินค้าคงเหลือ — '+(s.shopName||'วิสาหกิจชุมชนบ้านกันแสง')],
+    ['วันที่: '+now+' | '+( s.address||'')],
+    [''],
+    ['ลำดับ','รหัส/บาร์โค้ด','ชื่อสินค้า','หมวดหมู่','หน่วย','คงเหลือ','สต็อกต่ำสุด','ราคาขาย','ต้นทุน','มูลค่าสต็อก','สถานะ'],
+    ...prods.map((p,i)=>{
+      const out=p.stock<=0,low=p.stock>0&&p.stock<=p.minStock;
+      return [i+1,p.barcode||p.id,p.name,p.category,p.unit,p.stock,p.minStock,p.price,p.cost,p.stock*p.cost,out?'หมด':low?'ใกล้หมด':'ปกติ'];
+    }),
+    [''],['','','รวม','','',totalQty,'','','',totalVal,''],
+  ];
+  const csv = '﻿' + rows.map(r=>r.map(esc).join(',')).join('
+');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = 'stock_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ===== EXPORT PDF =====
+function doExportPDF() {
+  const prods = getFiltered();
+  const s = getSettings();
+  const now = new Date().toLocaleString('th-TH');
+  const totalVal = prods.reduce((sum,p)=>sum+p.stock*p.cost,0);
+  const totalQty = prods.reduce((sum,p)=>sum+p.stock,0);
+  const outN=prods.filter(p=>p.stock<=0).length;
+  const lowN=prods.filter(p=>p.stock>0&&p.stock<=p.minStock).length;
+  const rows = prods.map((p,i)=>{
+    const out=p.stock<=0,low=p.stock>0&&p.stock<=p.minStock;
+    const col=out?'#C62828':low?'#E65100':'#2D6A4F';
+    return `<tr style="background:${i%2?'#f5fbf5':'#fff'}">
+      <td style="text-align:center">${i+1}</td>
+      <td style="font-family:monospace;font-size:9px;color:#888">${p.barcode||p.id}</td>
+      <td>${p.image} <b>${p.name}</b></td>
       <td>${p.category}</td>
-      <td><strong style="color:${out?'var(--red)':low?'var(--amber)':'var(--green)'}">${p.stock}</strong> ${p.unit}</td>
-      <td>${p.minStock} ${p.unit}</td>
-      <td>${formatMoney(p.price)}</td>
-      <td>${formatMoney(p.cost)}</td>
-      <td><strong>${formatMoney(val)}</strong></td>
-      <td><span class="badge ${out?'br':low?'ba':'bg'}">${out?'หมด':low?'ใกล้หมด':'ปกติ'}</span></td>
+      <td style="text-align:center;color:${col};font-weight:700">${p.stock} ${p.unit}</td>
+      <td style="text-align:center">${p.minStock}</td>
+      <td style="text-align:right">฿${p.price.toLocaleString()}</td>
+      <td style="text-align:right">฿${p.cost.toLocaleString()}</td>
+      <td style="text-align:right;font-weight:700">฿${(p.stock*p.cost).toLocaleString()}</td>
+      <td style="text-align:center;color:${col};font-weight:700">${out?'หมด':low?'ใกล้หมด':'ปกติ'}</td>
     </tr>`;
-  }).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:2rem">ไม่พบสินค้า</td></tr>';
-
-  // Footer summary
-  document.getElementById('stock-footer').innerHTML = `
-    <tr style="background:var(--green-p);font-weight:700">
-      <td colspan="3" style="padding:.75rem 1rem;color:var(--green)">รวมทั้งหมด ${products.length} รายการ</td>
-      <td style="padding:.75rem 1rem;color:var(--green)">${totalQty} ชิ้น</td>
-      <td colspan="3" style="padding:.75rem 1rem"></td>
-      <td style="padding:.75rem 1rem;color:var(--green);font-size:1rem">${formatMoney(totalVal)}</td>
-      <td></td>
-    </tr>`;
-
-  // Set print date
-  const pd = document.getElementById('print-date');
-  if (pd) pd.textContent = 'พิมพ์เมื่อ: ' + new Date().toLocaleString('th-TH') + ' | วิสาหกิจชุมชนบ้านกันแสง';
+  }).join('');
+  const html = `<!DOCTYPE html><html lang="th"><head>
+<meta charset="UTF-8"><title>รายงานสต็อก</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Sarabun',sans-serif;font-size:11px;padding:16px}
+.hd{text-align:center;border-bottom:3px solid #2D6A4F;padding-bottom:10px;margin-bottom:10px}
+.hd h1{font-size:15px;color:#2D6A4F;margin-bottom:3px}.hd p{font-size:9px;color:#666}
+.sum{display:flex;gap:8px;margin-bottom:10px}
+.sb{flex:1;text-align:center;padding:6px;border:1px solid #ddd;border-radius:6px}
+.sb .v{font-size:13px;font-weight:700;color:#2D6A4F}.sb .l{font-size:9px;color:#888}
+table{width:100%;border-collapse:collapse}
+th{background:#2D6A4F;color:#fff;padding:5px 7px;font-size:9.5px;text-align:left;white-space:nowrap}
+td{padding:4px 7px;border-bottom:1px solid #e8f0e6;font-size:10px}
+.ft td{background:#D8F3DC;font-weight:700;color:#2D6A4F}
+@media print{@page{size:A4 landscape;margin:8mm}}
+</style></head><body>
+<div class="hd"><h1>📦 รายงานสต็อกสินค้าคงเหลือ</h1>
+<p>${s.shopName||'วิสาหกิจชุมชนบ้านกันแสง'} | ${s.address||''} | พิมพ์เมื่อ ${now}</p></div>
+<div class="sum">
+<div class="sb"><div class="v">${prods.length}</div><div class="l">รายการ</div></div>
+<div class="sb"><div class="v">${totalQty.toLocaleString()}</div><div class="l">จำนวนรวม</div></div>
+<div class="sb"><div class="v">฿${totalVal.toLocaleString()}</div><div class="l">มูลค่ารวม</div></div>
+<div class="sb"><div class="v" style="color:#C62828">${outN}</div><div class="l">หมดแล้ว</div></div>
+<div class="sb"><div class="v" style="color:#E65100">${lowN}</div><div class="l">ใกล้หมด</div></div>
+<div class="sb"><div class="v">${prods.length-outN-lowN}</div><div class="l">ปกติ</div></div>
+</div>
+<table><thead><tr>
+<th>#</th><th>รหัส</th><th>ชื่อสินค้า</th><th>หมวดหมู่</th>
+<th style="text-align:center">คงเหลือ</th><th style="text-align:center">ต่ำสุด</th>
+<th style="text-align:right">ราคาขาย</th><th style="text-align:right">ต้นทุน</th>
+<th style="text-align:right">มูลค่าสต็อก</th><th style="text-align:center">สถานะ</th>
+</tr></thead>
+<tbody>${rows}</tbody>
+<tfoot><tr class="ft">
+<td colspan="4">รวม ${prods.length} รายการ</td>
+<td style="text-align:center">${totalQty.toLocaleString()}</td>
+<td colspan="3"></td>
+<td style="text-align:right">฿${totalVal.toLocaleString()}</td><td></td>
+</tr></tfoot></table>
+<script>setTimeout(()=>window.print(),500)<\/script>
+</body></html>`;
+  const w = window.open('','_blank','width=1100,height=750');
+  if(!w){alert('กรุณาอนุญาต Pop-up แล้วลองใหม่ครับ');return;}
+  w.document.write(html); w.document.close();
 }
 
 function switchTab(tab, el) {
