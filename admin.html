@@ -135,7 +135,7 @@ tr:hover td{background:#FAFCFA}
       <div class="table-card">
         <div class="table-head">
           <h3>📦 รายการสินค้า</h3>
-          <div style="display:flex;gap:.5rem"><button class="btn btn-green" onclick="openAddProduct()">+ เพิ่มสินค้า</button><button class="btn btn-outline" onclick="resetToDefault()" style="font-size:.78rem">🔄 รีเซ็ตตัวอย่าง</button></div>
+          <button class="btn btn-green" onclick="openAddProduct()">+ เพิ่มสินค้า</button>
         </div>
         <div class="toolbar">
           <input type="text" id="p-search" placeholder="ค้นหาสินค้า..." oninput="renderProductTable()">
@@ -238,10 +238,8 @@ tr:hover td{background:#FAFCFA}
     <h2 id="pm-title">เพิ่มสินค้าใหม่</h2>
     <div class="form-grid">
       <div class="form-row"><label>ชื่อสินค้า *</label><input id="pm-name" type="text" placeholder="ชื่อสินค้า"></div>
-      <div class="form-row"><label>หมวดหมู่ *</label>
-        <select id="pm-cat" style="width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.875rem;outline:none">
-          <option value="">-- เลือกหมวดหมู่ --</option>
-        </select></div>
+      <div class="form-row"><label>หมวดหมู่ *</label><input id="pm-cat" type="text" placeholder="เช่น ขนม-ของฝาก" list="cat-list">
+        <datalist id="cat-list"></datalist></div>
       <div class="form-row"><label>ราคาขาย (บาท) *</label><input id="pm-price" type="number" min="0" step="0.5"></div>
       <div class="form-row"><label>ต้นทุน (บาท)</label><input id="pm-cost" type="number" min="0" step="0.5"></div>
       <div class="form-row"><label>สต็อกเริ่มต้น</label><input id="pm-stock" type="number" min="0" value="0"></div>
@@ -270,96 +268,19 @@ const KEYS = {
 };
 
 // ===== สินค้าตัวอย่าง =====
-// ===== หมวดหมู่สินค้าทั้งหมด 18 หมวด =====
-const ALL_CATEGORIES = [
-  'ของใช้ในบ้าน',
-  'อาหารและเครื่องปรุง',
-  'เครื่องดื่มไม่มีแอลกอฮอล์',
-  'เครื่องดื่มมีแอลกอฮอล์',
-  'ยาสามัญประจำบ้าน',
-  'เนื้อสัตว์',
-  'ผลไม้',
-  'ผัก',
-  'ข้าวสาร',
-  'ของใช้ในครัว',
-  'ของใช้ส่วนตัว',
-  'แม่และเด็ก',
-  'ของใช้สำนักงาน',
-  'เครื่องใช้ไฟฟ้า',
-  'อาหารสัตว์',
-  'ปุ๋ย',
-  'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์',
-  'อื่น ๆ',
-];
-
 const DEFAULT_PRODUCTS = [
-  // 1. ของใช้ในบ้าน
-  { id:'P001', name:'น้ำยาล้างจาน', category:'ของใช้ในบ้าน', price:35, cost:22, stock:50, minStock:10, unit:'ขวด', image:'🧴', barcode:'8850101001', active:true },
-  { id:'P002', name:'ผงซักฟอก', category:'ของใช้ในบ้าน', price:55, cost:35, stock:40, minStock:10, unit:'ถุง', image:'🧺', barcode:'8850101002', active:true },
-  { id:'P003', name:'น้ำยาปรับผ้านุ่ม', category:'ของใช้ในบ้าน', price:45, cost:28, stock:30, minStock:8, unit:'ขวด', image:'🫧', barcode:'8850101003', active:true },
-  // 2. อาหารและเครื่องปรุง
-  { id:'P004', name:'น้ำปลา', category:'อาหารและเครื่องปรุง', price:28, cost:16, stock:60, minStock:15, unit:'ขวด', image:'🍶', barcode:'8850102001', active:true },
-  { id:'P005', name:'น้ำมันพืช', category:'อาหารและเครื่องปรุง', price:65, cost:45, stock:40, minStock:10, unit:'ขวด', image:'🫙', barcode:'8850102002', active:true },
-  { id:'P006', name:'น้ำพริกปลาทู', category:'อาหารและเครื่องปรุง', price:45, cost:25, stock:30, minStock:5, unit:'กระปุก', image:'🌶️', barcode:'8850102003', active:true },
-  { id:'P007', name:'กะปิ', category:'อาหารและเครื่องปรุง', price:30, cost:18, stock:25, minStock:5, unit:'กระปุก', image:'🦐', barcode:'8850102004', active:true },
-  // 3. เครื่องดื่มไม่มีแอลกอฮอล์
-  { id:'P008', name:'น้ำดื่มบรรจุขวด', category:'เครื่องดื่มไม่มีแอลกอฮอล์', price:8, cost:4, stock:120, minStock:24, unit:'ขวด', image:'💧', barcode:'8850103001', active:true },
-  { id:'P009', name:'น้ำอัดลม', category:'เครื่องดื่มไม่มีแอลกอฮอล์', price:15, cost:9, stock:72, minStock:12, unit:'กระป๋อง', image:'🥤', barcode:'8850103002', active:true },
-  { id:'P010', name:'ชาสมุนไพรรวม', category:'เครื่องดื่มไม่มีแอลกอฮอล์', price:120, cost:70, stock:22, minStock:8, unit:'กล่อง', image:'🍵', barcode:'8850103003', active:true },
-  // 4. เครื่องดื่มมีแอลกอฮอล์
-  { id:'P011', name:'เบียร์ช้าง', category:'เครื่องดื่มมีแอลกอฮอล์', price:55, cost:40, stock:48, minStock:12, unit:'กระป๋อง', image:'🍺', barcode:'8850104001', active:true },
-  { id:'P012', name:'ไวน์ข้าว', category:'เครื่องดื่มมีแอลกอฮอล์', price:150, cost:90, stock:20, minStock:5, unit:'ขวด', image:'🍷', barcode:'8850104002', active:true },
-  // 5. ยาสามัญประจำบ้าน
-  { id:'P013', name:'พาราเซตามอล', category:'ยาสามัญประจำบ้าน', price:25, cost:12, stock:100, minStock:20, unit:'แผง', image:'💊', barcode:'8850105001', active:true },
-  { id:'P014', name:'ยาธาตุน้ำขาว', category:'ยาสามัญประจำบ้าน', price:30, cost:18, stock:40, minStock:10, unit:'ขวด', image:'🏥', barcode:'8850105002', active:true },
-  { id:'P015', name:'ยาหม่อง', category:'ยาสามัญประจำบ้าน', price:35, cost:20, stock:30, minStock:8, unit:'กระปุก', image:'🩺', barcode:'8850105003', active:true },
-  // 6. เนื้อสัตว์
-  { id:'P016', name:'หมูสด', category:'เนื้อสัตว์', price:120, cost:90, stock:20, minStock:5, unit:'กก.', image:'🥩', barcode:'8850106001', active:true },
-  { id:'P017', name:'ไก่สด', category:'เนื้อสัตว์', price:80, cost:60, stock:15, minStock:5, unit:'กก.', image:'🍗', barcode:'8850106002', active:true },
-  { id:'P018', name:'ปลาสด', category:'เนื้อสัตว์', price:90, cost:65, stock:10, minStock:3, unit:'กก.', image:'🐟', barcode:'8850106003', active:true },
-  // 7. ผลไม้
-  { id:'P019', name:'กล้วยน้ำว้า', category:'ผลไม้', price:30, cost:18, stock:50, minStock:10, unit:'หวี', image:'🍌', barcode:'8850107001', active:true },
-  { id:'P020', name:'มะม่วง', category:'ผลไม้', price:50, cost:30, stock:30, minStock:8, unit:'กก.', image:'🥭', barcode:'8850107002', active:true },
-  { id:'P021', name:'ส้มเขียวหวาน', category:'ผลไม้', price:60, cost:38, stock:25, minStock:8, unit:'กก.', image:'🍊', barcode:'8850107003', active:true },
-  // 8. ผัก
-  { id:'P022', name:'ผักบุ้ง', category:'ผัก', price:15, cost:8, stock:40, minStock:10, unit:'กก.', image:'🥬', barcode:'8850108001', active:true },
-  { id:'P023', name:'ถั่วฝักยาว', category:'ผัก', price:20, cost:12, stock:30, minStock:8, unit:'กก.', image:'🫘', barcode:'8850108002', active:true },
-  { id:'P024', name:'กะหล่ำปลี', category:'ผัก', price:18, cost:10, stock:25, minStock:8, unit:'กก.', image:'🥦', barcode:'8850108003', active:true },
-  // 9. ข้าวสาร
-  { id:'P025', name:'ข้าวกล้องอินทรีย์', category:'ข้าวสาร', price:85, cost:55, stock:50, minStock:10, unit:'กก.', image:'🌾', barcode:'8850109001', active:true },
-  { id:'P026', name:'ข้าวหอมมะลิ', category:'ข้าวสาร', price:55, cost:38, stock:80, minStock:20, unit:'กก.', image:'🍚', barcode:'8850109002', active:true },
-  { id:'P027', name:'ข้าวเหนียว', category:'ข้าวสาร', price:45, cost:30, stock:60, minStock:15, unit:'กก.', image:'🍙', barcode:'8850109003', active:true },
-  // 10. ของใช้ในครัว
-  { id:'P028', name:'กระทะอลูมิเนียม', category:'ของใช้ในครัว', price:180, cost:110, stock:15, minStock:3, unit:'ใบ', image:'🍳', barcode:'8850110001', active:true },
-  { id:'P029', name:'ช้อนส้อมสแตนเลส', category:'ของใช้ในครัว', price:25, cost:15, stock:50, minStock:10, unit:'ชิ้น', image:'🍴', barcode:'8850110002', active:true },
-  { id:'P030', name:'ถ้วยชามเมลามีน', category:'ของใช้ในครัว', price:35, cost:20, stock:30, minStock:8, unit:'ใบ', image:'🍽️', barcode:'8850110003', active:true },
-  // 11. ของใช้ส่วนตัว
-  { id:'P031', name:'แชมพู', category:'ของใช้ส่วนตัว', price:80, cost:52, stock:30, minStock:8, unit:'ขวด', image:'🧴', barcode:'8850111001', active:true },
-  { id:'P032', name:'สบู่ก้อน', category:'ของใช้ส่วนตัว', price:20, cost:12, stock:60, minStock:15, unit:'ก้อน', image:'🧼', barcode:'8850111002', active:true },
-  { id:'P033', name:'แปรงสีฟัน', category:'ของใช้ส่วนตัว', price:25, cost:14, stock:40, minStock:10, unit:'ด้าม', image:'🪥', barcode:'8850111003', active:true },
-  // 12. แม่และเด็ก
-  { id:'P034', name:'ผ้าอ้อมสำเร็จรูป', category:'แม่และเด็ก', price:180, cost:130, stock:20, minStock:5, unit:'แพ็ค', image:'👶', barcode:'8850112001', active:true },
-  { id:'P035', name:'นมผงสำหรับเด็ก', category:'แม่และเด็ก', price:350, cost:260, stock:15, minStock:5, unit:'กระป๋อง', image:'🍼', barcode:'8850112002', active:true },
-  // 13. ของใช้สำนักงาน
-  { id:'P036', name:'กระดาษ A4', category:'ของใช้สำนักงาน', price:120, cost:85, stock:20, minStock:5, unit:'รีม', image:'📄', barcode:'8850113001', active:true },
-  { id:'P037', name:'ปากกาลูกลื่น', category:'ของใช้สำนักงาน', price:8, cost:4, stock:100, minStock:20, unit:'ด้าม', image:'🖊️', barcode:'8850113002', active:true },
-  // 14. เครื่องใช้ไฟฟ้า
-  { id:'P038', name:'หลอดไฟ LED', category:'เครื่องใช้ไฟฟ้า', price:85, cost:55, stock:20, minStock:5, unit:'หลอด', image:'💡', barcode:'8850114001', active:true },
-  { id:'P039', name:'ถ่านไฟฉาย AA', category:'เครื่องใช้ไฟฟ้า', price:30, cost:18, stock:50, minStock:10, unit:'แพ็ค', image:'🔋', barcode:'8850114002', active:true },
-  // 15. อาหารสัตว์
-  { id:'P040', name:'อาหารสุนัข', category:'อาหารสัตว์', price:120, cost:80, stock:20, minStock:5, unit:'กก.', image:'🐕', barcode:'8850115001', active:true },
-  { id:'P041', name:'อาหารแมว', category:'อาหารสัตว์', price:95, cost:62, stock:20, minStock:5, unit:'กก.', image:'🐈', barcode:'8850115002', active:true },
-  { id:'P042', name:'อาหารปลา', category:'อาหารสัตว์', price:35, cost:20, stock:30, minStock:8, unit:'ถุง', image:'🐠', barcode:'8850115003', active:true },
-  // 16. ปุ๋ย
-  { id:'P043', name:'ปุ๋ยอินทรีย์', category:'ปุ๋ย', price:150, cost:95, stock:30, minStock:8, unit:'กก.', image:'🌱', barcode:'8850116001', active:true },
-  { id:'P044', name:'ปุ๋ยเคมีสูตร 16-16-16', category:'ปุ๋ย', price:380, cost:280, stock:20, minStock:5, unit:'กระสอบ', image:'🌿', barcode:'8850116002', active:true },
-  // 17. ยาหรือเคมีภัณฑ์สำหรับพืชหรือสัตว์
-  { id:'P045', name:'ยาฆ่าแมลง', category:'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์', price:120, cost:80, stock:15, minStock:5, unit:'ขวด', image:'🧪', barcode:'8850117001', active:true },
-  { id:'P046', name:'ยาฆ่าหญ้า', category:'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์', price:95, cost:62, stock:15, minStock:5, unit:'ขวด', image:'🌾', barcode:'8850117002', active:true },
-  { id:'P047', name:'วัคซีนสัตว์', category:'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์', price:200, cost:140, stock:10, minStock:3, unit:'ขวด', image:'💉', barcode:'8850117003', active:true },
-  // 18. อื่น ๆ
-  { id:'P048', name:'ถุงพลาสติก', category:'อื่น ๆ', price:15, cost:8, stock:50, minStock:10, unit:'แพ็ค', image:'🛍️', barcode:'8850118001', active:true },
-  { id:'P049', name:'เชือกฟาง', category:'อื่น ๆ', price:25, cost:15, stock:30, minStock:8, unit:'ม้วน', image:'🪢', barcode:'8850118002', active:true },
+  { id:'P001', name:'ข้าวกล้องอินทรีย์', category:'ข้าว-ธัญพืช', price:85, cost:55, stock:50, minStock:10, unit:'กก.', image:'🌾', barcode:'8850001001', active:true },
+  { id:'P002', name:'น้ำพริกปลาทู', category:'น้ำพริก-เครื่องแกง', price:45, cost:25, stock:30, minStock:5, unit:'กระปุก', image:'🌶️', barcode:'8850001002', active:true },
+  { id:'P003', name:'กล้วยฉาบ (ต้นตำรับ)', category:'ขนม-ของฝาก', price:60, cost:35, stock:25, minStock:8, unit:'ถุง', image:'🍌', barcode:'8850001003', active:true },
+  { id:'P004', name:'น้ำผึ้งธรรมชาติ', category:'ของป่า', price:180, cost:100, stock:15, minStock:5, unit:'ขวด', image:'🍯', barcode:'8850001004', active:true },
+  { id:'P005', name:'ขนมทองม้วน', category:'ขนม-ของฝาก', price:50, cost:28, stock:40, minStock:10, unit:'กล่อง', image:'🧁', barcode:'8850001005', active:true },
+  { id:'P006', name:'ปลาส้มแผ่น', category:'อาหารแปรรูป', price:75, cost:45, stock:20, minStock:5, unit:'แพ็ค', image:'🐟', barcode:'8850001006', active:true },
+  { id:'P007', name:'ผักอินทรีย์คละ', category:'ผัก-ผลไม้', price:35, cost:18, stock:60, minStock:15, unit:'กก.', image:'🥬', barcode:'8850001007', active:true },
+  { id:'P008', name:'แยมมะม่วง', category:'แปรรูปผลไม้', price:95, cost:55, stock:18, minStock:5, unit:'ขวด', image:'🥭', barcode:'8850001008', active:true },
+  { id:'P009', name:'สบู่สมุนไพร', category:'สมุนไพร-ความงาม', price:40, cost:20, stock:35, minStock:10, unit:'ก้อน', image:'🌿', barcode:'8850001009', active:true },
+  { id:'P010', name:'ชาสมุนไพรรวม', category:'เครื่องดื่ม', price:120, cost:70, stock:22, minStock:8, unit:'กล่อง', image:'🍵', barcode:'8850001010', active:true },
+  { id:'P011', name:'หมูแดดเดียว', category:'อาหารแปรรูป', price:130, cost:80, stock:12, minStock:5, unit:'แพ็ค', image:'🥩', barcode:'8850001011', active:true },
+  { id:'P012', name:'น้ำมันมะพร้าว', category:'น้ำมัน-เครื่องปรุง', price:160, cost:95, stock:8, minStock:5, unit:'ขวด', image:'🥥', barcode:'8850001012', active:true },
 ];
 
 const DEFAULT_SETTINGS = {
@@ -372,14 +293,9 @@ const DEFAULT_SETTINGS = {
 };
 
 // ===== INIT =====
-const STORE_VERSION = 'v3_18cats';
 function initStore() {
-  // Force reset เมื่อมีการอัปเดตหมวดหมู่ใหม่
-  if (localStorage.getItem('bsg_version') !== STORE_VERSION) {
+  if (!localStorage.getItem(KEYS.PRODUCTS)) {
     localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(DEFAULT_PRODUCTS));
-    localStorage.setItem(KEYS.ORDERS, localStorage.getItem(KEYS.ORDERS) || JSON.stringify([]));
-    localStorage.setItem(KEYS.SETTINGS, localStorage.getItem(KEYS.SETTINGS) || JSON.stringify(DEFAULT_SETTINGS));
-    localStorage.setItem('bsg_version', STORE_VERSION);
   }
   if (!localStorage.getItem(KEYS.ORDERS)) {
     localStorage.setItem(KEYS.ORDERS, JSON.stringify([]));
@@ -387,15 +303,6 @@ function initStore() {
   if (!localStorage.getItem(KEYS.SETTINGS)) {
     localStorage.setItem(KEYS.SETTINGS, JSON.stringify(DEFAULT_SETTINGS));
   }
-}
-function resetToDefault() {
-  if (!confirm('รีเซ็ตสินค้าตัวอย่างทั้งหมด 49 รายการ?
-
-⚠️ สินค้าที่เพิ่มเองจะถูกลบออก')) return;
-  localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(DEFAULT_PRODUCTS));
-  localStorage.setItem('bsg_version', STORE_VERSION);
-  window.dispatchEvent(new CustomEvent('stockUpdated'));
-  alert('✅ รีเซ็ตสินค้าตัวอย่างเรียบร้อยแล้ว');
 }
 
 // ===== PRODUCTS =====
@@ -488,8 +395,8 @@ function saveSettings(s) {
 
 // ===== CATEGORIES =====
 function getCategories() {
-  const fromProducts = getProducts().map(p => p.category);
-  return [...new Set([...ALL_CATEGORIES, ...fromProducts])];
+  const cats = [...new Set(getProducts().map(p => p.category))];
+  return cats;
 }
 
 // ===== STATS =====
@@ -566,11 +473,12 @@ function renderProductTable() {
   if (q) prods = prods.filter(p => p.name.toLowerCase().includes(q) || p.barcode?.includes(q));
   if (cat) prods = prods.filter(p => p.category === cat);
 
-  // Fill category filter dropdown (always refresh)
+  // Fill category filter
+  const cats = getCategories();
   const sel = document.getElementById('p-cat');
-  const currentVal = sel.value;
-  sel.innerHTML = '<option value="">ทุกหมวดหมู่</option>' + ALL_CATEGORIES.map(cat => '<option value="' + cat + '">' + cat + '</option>').join('');
-  sel.value = currentVal;
+  if (sel.options.length <= 1) {
+    cats.forEach(c => { const o = document.createElement('option'); o.value = o.textContent = c; sel.appendChild(o); });
+  }
 
   document.getElementById('product-tbody').innerHTML = prods.map(p => {
     const low = p.stock <= p.minStock && p.stock > 0;
@@ -589,9 +497,8 @@ function renderProductTable() {
         : '<span class="badge badge-green">มีสินค้า</span>'}
       </td>
       <td style="display:flex;gap:.5rem">
-        <button class="btn btn-outline btn-sm" onclick="openEditProduct('${p.id}')">✏️ แก้ไข</button>
-        <button class="btn btn-outline btn-sm" style="color:var(--amber)" onclick="doToggleProduct('${p.id}')">${p.active ? '🔕 ปิด' : '✅ เปิด'}</button>
-        <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:var(--red)" onclick="doRemoveProduct('${p.id}')">🗑️ ลบ</button>
+        <button class="btn btn-outline btn-sm" onclick="openEditProduct('${p.id}')">แก้ไข</button>
+        <button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="doDeleteProduct('${p.id}')">${p.active ? 'ปิด' : 'เปิด'}</button>
       </td>
     </tr>`;
   }).join('');
@@ -615,8 +522,7 @@ function openEditProduct(id) {
   document.getElementById('pm-title').textContent = 'แก้ไขสินค้า';
   document.getElementById('pm-id').value = p.id;
   document.getElementById('pm-name').value = p.name;
-  const catSel2 = document.getElementById('pm-cat');
-  catSel2.innerHTML = '<option value="">-- เลือกหมวดหมู่ --</option>' + ALL_CATEGORIES.map(cat => '<option value="' + cat + '"' + (cat === p.category ? ' selected' : '') + '>' + cat + '</option>').join('');
+  document.getElementById('pm-cat').value = p.category;
   document.getElementById('pm-price').value = p.price;
   document.getElementById('pm-cost').value = p.cost;
   document.getElementById('pm-stock').value = p.stock;
@@ -649,7 +555,7 @@ function saveProduct() {
   renderProductTable();
   renderOverview();
 }
-function doToggleProduct(id) {
+function doDeleteProduct(id) {
   const p = getProduct(id);
   if (!p) return;
   if (!confirm(`${p.active ? 'ปิดการขาย' : 'เปิดการขาย'} "${p.name}"?`)) return;
@@ -659,19 +565,6 @@ function doToggleProduct(id) {
   saveProducts(all);
   renderProductTable();
   renderOverview();
-}
-function doRemoveProduct(id) {
-  const p = getProduct(id);
-  if (!p) return;
-  if (!confirm(`⚠️ ลบสินค้า "${p.name}" ออกจากระบบถาวร?\n\nการลบนี้ไม่สามารถยกเลิกได้`)) return;
-  const all = getProducts().filter(x => x.id !== id);
-  saveProducts(all);
-  renderProductTable();
-  renderOverview();
-  // re-render category dropdown
-  const sel = document.getElementById('p-cat');
-  while(sel.options.length > 1) sel.remove(1);
-  getCategories().forEach(c => { const o = document.createElement('option'); o.value = o.textContent = c; sel.appendChild(o); });
 }
 
 // ORDERS
