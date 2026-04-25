@@ -132,68 +132,19 @@ const KEYS = {
 
 // ===== สินค้าตัวอย่าง =====
 const DEFAULT_PRODUCTS = [
-  { id:'P001', name:'ข้าวกล้องอินทรีย์', category:'ข้าวสาร', price:85, cost:55, stock:50, minStock:10, unit:'กก.', image:'🌾', barcode:'8850001001', active:true },
-  { id:'P002', name:'น้ำพริกปลาทู', category:'อาหารและเครื่องปรุง', price:45, cost:25, stock:30, minStock:5, unit:'กระปุก', image:'🌶️', barcode:'8850001002', active:true },
-  { id:'P003', name:'กล้วยฉาบ (ต้นตำรับ)', category:'อาหารและเครื่องปรุง', price:60, cost:35, stock:25, minStock:8, unit:'ถุง', image:'🍌', barcode:'8850001003', active:true },
-  { id:'P004', name:'น้ำผึ้งธรรมชาติ', category:'อาหารและเครื่องปรุง', price:180, cost:100, stock:15, minStock:5, unit:'ขวด', image:'🍯', barcode:'8850001004', active:true },
-  { id:'P005', name:'ขนมทองม้วน', category:'อาหารและเครื่องปรุง', price:50, cost:28, stock:40, minStock:10, unit:'กล่อง', image:'🧁', barcode:'8850001005', active:true },
-  { id:'P006', name:'ปลาส้มแผ่น', category:'เนื้อสัตว์', price:75, cost:45, stock:20, minStock:5, unit:'แพ็ค', image:'🐟', barcode:'8850001006', active:true },
-  { id:'P007', name:'ผักอินทรีย์คละ', category:'ผัก', price:35, cost:18, stock:60, minStock:15, unit:'กก.', image:'🥬', barcode:'8850001007', active:true },
-  { id:'P008', name:'แยมมะม่วง', category:'ผลไม้', price:95, cost:55, stock:18, minStock:5, unit:'ขวด', image:'🥭', barcode:'8850001008', active:true },
-  { id:'P009', name:'สบู่สมุนไพร', category:'ของใช้ส่วนตัว', price:40, cost:20, stock:35, minStock:10, unit:'ก้อน', image:'🌿', barcode:'8850001009', active:true },
-  { id:'P010', name:'ชาสมุนไพรรวม', category:'เครื่องดื่มไม่มีแอลกอฮอล์', price:120, cost:70, stock:22, minStock:8, unit:'กล่อง', image:'🍵', barcode:'8850001010', active:true },
-  { id:'P011', name:'หมูแดดเดียว', category:'เนื้อสัตว์', price:130, cost:80, stock:12, minStock:5, unit:'แพ็ค', image:'🥩', barcode:'8850001011', active:true },
-  { id:'P012', name:'น้ำมันมะพร้าว', category:'อาหารและเครื่องปรุง', price:160, cost:95, stock:8, minStock:5, unit:'ขวด', image:'🥥', barcode:'8850001012', active:true },
+  { id:'P001', name:'ข้าวกล้องอินทรีย์', category:'ข้าว-ธัญพืช', price:85, cost:55, stock:50, minStock:10, unit:'กก.', image:'🌾', barcode:'8850001001', active:true },
+  { id:'P002', name:'น้ำพริกปลาทู', category:'น้ำพริก-เครื่องแกง', price:45, cost:25, stock:30, minStock:5, unit:'กระปุก', image:'🌶️', barcode:'8850001002', active:true },
+  { id:'P003', name:'กล้วยฉาบ (ต้นตำรับ)', category:'ขนม-ของฝาก', price:60, cost:35, stock:25, minStock:8, unit:'ถุง', image:'🍌', barcode:'8850001003', active:true },
+  { id:'P004', name:'น้ำผึ้งธรรมชาติ', category:'ของป่า', price:180, cost:100, stock:15, minStock:5, unit:'ขวด', image:'🍯', barcode:'8850001004', active:true },
+  { id:'P005', name:'ขนมทองม้วน', category:'ขนม-ของฝาก', price:50, cost:28, stock:40, minStock:10, unit:'กล่อง', image:'🧁', barcode:'8850001005', active:true },
+  { id:'P006', name:'ปลาส้มแผ่น', category:'อาหารแปรรูป', price:75, cost:45, stock:20, minStock:5, unit:'แพ็ค', image:'🐟', barcode:'8850001006', active:true },
+  { id:'P007', name:'ผักอินทรีย์คละ', category:'ผัก-ผลไม้', price:35, cost:18, stock:60, minStock:15, unit:'กก.', image:'🥬', barcode:'8850001007', active:true },
+  { id:'P008', name:'แยมมะม่วง', category:'แปรรูปผลไม้', price:95, cost:55, stock:18, minStock:5, unit:'ขวด', image:'🥭', barcode:'8850001008', active:true },
+  { id:'P009', name:'สบู่สมุนไพร', category:'สมุนไพร-ความงาม', price:40, cost:20, stock:35, minStock:10, unit:'ก้อน', image:'🌿', barcode:'8850001009', active:true },
+  { id:'P010', name:'ชาสมุนไพรรวม', category:'เครื่องดื่ม', price:120, cost:70, stock:22, minStock:8, unit:'กล่อง', image:'🍵', barcode:'8850001010', active:true },
+  { id:'P011', name:'หมูแดดเดียว', category:'อาหารแปรรูป', price:130, cost:80, stock:12, minStock:5, unit:'แพ็ค', image:'🥩', barcode:'8850001011', active:true },
+  { id:'P012', name:'น้ำมันมะพร้าว', category:'น้ำมัน-เครื่องปรุง', price:160, cost:95, stock:8, minStock:5, unit:'ขวด', image:'🥥', barcode:'8850001012', active:true },
 ];
-
-const CATEGORY_LIST = [
-  'ของใช้ในบ้าน',
-  'อาหารและเครื่องปรุง',
-  'เครื่องดื่มไม่มีแอลกอฮอล์',
-  'เครื่องดื่มมีแอลกอฮอล์',
-  'ยาสามัญประจําบ้าน',
-  'เนื้อสัตว์',
-  'ผลไม้',
-  'ผัก',
-  'ข้าวสาร',
-  'ของใช้ในครัว',
-  'ของใช้ส่วนตัว',
-  'แม่และเด็ก',
-  'ของใช้สำนักงาน',
-  'เครื่องใช้ไฟฟ้า',
-  'อาหารสัตว์',
-  'ปุ๋ย',
-  'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์',
-  'อื่น ๆ'
-];
-
-function normalizeCategory(product) {
-  const name = product.name || '';
-  const cat = product.category || '';
-  if (name.includes('ข้าว')) return 'ข้าวสาร';
-  if (name.includes('น้ำพริก') || name.includes('น้ำมัน') || name.includes('น้ำผึ้ง') || name.includes('ขนม') || name.includes('กล้วยฉาบ')) return 'อาหารและเครื่องปรุง';
-  if (name.includes('ชา') || cat === 'เครื่องดื่ม') return 'เครื่องดื่มไม่มีแอลกอฮอล์';
-  if (name.includes('หมู') || name.includes('ปลา')) return 'เนื้อสัตว์';
-  if (name.includes('แยม') || name.includes('มะม่วง') || cat === 'แปรรูปผลไม้') return 'ผลไม้';
-  if (name.includes('ผัก')) return 'ผัก';
-  if (name.includes('สบู่')) return 'ของใช้ส่วนตัว';
-  const map = {
-    'ข้าว-ธัญพืช':'ข้าวสาร',
-    'น้ำพริก-เครื่องแกง':'อาหารและเครื่องปรุง',
-    'ขนม-ของฝาก':'อาหารและเครื่องปรุง',
-    'ของป่า':'อาหารและเครื่องปรุง',
-    'อาหารแปรรูป':'อาหารและเครื่องปรุง',
-    'ผัก-ผลไม้':'ผัก',
-    'สมุนไพร-ความงาม':'ของใช้ส่วนตัว',
-    'น้ำมัน-เครื่องปรุง':'อาหารและเครื่องปรุง',
-    'เครื่องดื่ม':'เครื่องดื่มไม่มีแอลกอฮอล์'
-  };
-  return CATEGORY_LIST.includes(cat) ? cat : (map[cat] || 'อื่น ๆ');
-}
-
-function normalizeProducts(products) {
-  return products.map(p => ({...p, category: normalizeCategory(p)}));
-}
 
 const DEFAULT_SETTINGS = {
   shopName: 'วิสาหกิจชุมชนบ้านกันแสง',
@@ -208,12 +159,6 @@ const DEFAULT_SETTINGS = {
 function initStore() {
   if (!localStorage.getItem(KEYS.PRODUCTS)) {
     localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(DEFAULT_PRODUCTS));
-  } else {
-    const current = JSON.parse(localStorage.getItem(KEYS.PRODUCTS) || '[]');
-    const normalized = normalizeProducts(current);
-    if (JSON.stringify(current) !== JSON.stringify(normalized)) {
-      localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(normalized));
-    }
   }
   if (!localStorage.getItem(KEYS.ORDERS)) {
     localStorage.setItem(KEYS.ORDERS, JSON.stringify([]));
@@ -225,7 +170,7 @@ function initStore() {
 
 // ===== PRODUCTS =====
 function getProducts(activeOnly = false) {
-  const p = normalizeProducts(JSON.parse(localStorage.getItem(KEYS.PRODUCTS) || '[]'));
+  const p = JSON.parse(localStorage.getItem(KEYS.PRODUCTS) || '[]');
   return activeOnly ? p.filter(x => x.active) : p;
 }
 function saveProducts(products) {
@@ -313,7 +258,8 @@ function saveSettings(s) {
 
 // ===== CATEGORIES =====
 function getCategories() {
-  return CATEGORY_LIST;
+  const cats = [...new Set(getProducts().map(p => p.category))];
+  return cats;
 }
 
 // ===== STATS =====
