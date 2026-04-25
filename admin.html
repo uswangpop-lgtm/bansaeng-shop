@@ -176,80 +176,26 @@ tr:hover td{background:#FAFCFA}
 
     <!-- STOCK IN PAGE -->
     <div class="page" id="page-stock">
-      <!-- ฟอร์มรับสินค้าเข้า -->
-      <div class="table-card" style="margin-bottom:1.25rem">
-        <div class="table-head"><h3>📥 บันทึกรับสินค้าเข้า</h3></div>
-        <div style="padding:1.25rem 1.5rem 1.5rem">
-
-          <!-- ขั้นตอนที่ 1: เลือกหมวดหมู่ -->
-          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">
-            <span style="background:var(--green);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0">1</span>
-            <label style="font-size:.82rem;font-weight:700;color:var(--text2)">เลือกหมวดหมู่</label>
-          </div>
-          <select id="stock-cat" onchange="filterStockProducts()"
-            style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none;margin-bottom:1rem;transition:.2s">
-            <option value="">-- ทุกหมวดหมู่ --</option>
-          </select>
-
-          <!-- ขั้นตอนที่ 2: ค้นหา + เลือกสินค้า -->
-          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">
-            <span style="background:var(--green);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0">2</span>
-            <label style="font-size:.82rem;font-weight:700;color:var(--text2)">ค้นหา / เลือกสินค้า</label>
-          </div>
-          <input type="text" id="stock-search" placeholder="พิมพ์ชื่อสินค้าเพื่อค้นหา..." oninput="filterStockProducts()"
-            style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none;margin-bottom:.6rem;transition:.2s">
-          <select id="stock-product" size="6" onchange="updateStockPreview()"
-            style="width:100%;padding:.4rem;border:1.5px solid var(--green);border-radius:var(--r);font-family:var(--font);font-size:.875rem;outline:none;margin-bottom:1rem;background:white">
-          </select>
-
-          <!-- preview สินค้าที่เลือก -->
-          <div id="stock-preview" style="display:none;background:var(--green-p);border:1px solid var(--green-l);border-radius:var(--r);padding:.85rem 1rem;margin-bottom:1rem">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
-              <div>
-                <span id="prev-name" style="font-weight:700;font-size:.95rem"></span>
-                <span id="prev-cat" style="font-size:.75rem;color:var(--text2);margin-left:.5rem"></span>
-              </div>
-              <div style="display:flex;gap:1.5rem;font-size:.85rem">
-                <span>คงเหลือ: <strong id="prev-stock" style="color:var(--green)"></strong></span>
-                <span>ต่ำสุด: <strong id="prev-min"></strong></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- ขั้นตอนที่ 3: จำนวน + หมายเหตุ -->
-          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">
-            <span style="background:var(--green);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0">3</span>
-            <label style="font-size:.82rem;font-weight:700;color:var(--text2)">ระบุจำนวนและหมายเหตุ</label>
+      <div class="table-card">
+        <div class="table-head"><h3>📥 รับสินค้าเข้า</h3></div>
+        <div style="padding:1.5rem">
+          <div class="form-row"><label>เลือกสินค้า</label>
+            <select id="stock-product" style="width:100%;padding:.65rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.9rem;outline:none"></select>
           </div>
           <div class="form-grid">
-            <div class="form-row">
-              <label>จำนวนที่รับเข้า *</label>
-              <input type="number" id="stock-qty" min="1" value="1" placeholder="จำนวน">
-            </div>
-            <div class="form-row">
-              <label>หมายเหตุ</label>
-              <input type="text" id="stock-note" placeholder="เช่น รับจากซัพพลายเออร์">
-            </div>
+            <div class="form-row"><label>จำนวนที่รับเข้า</label><input type="number" id="stock-qty" min="1" value="1" placeholder="จำนวน"></div>
+            <div class="form-row"><label>หมายเหตุ</label><input type="text" id="stock-note" placeholder="เช่น รับจากซัพพลายเออร์"></div>
           </div>
-
-          <button class="btn btn-green" onclick="doAddStock()" style="margin-top:.75rem;width:100%;justify-content:center;padding:.85rem;font-size:1rem">
-            ✅ บันทึกรับสินค้าเข้า
-          </button>
+          <button class="btn btn-green" onclick="doAddStock()" style="margin-top:.5rem">✓ บันทึกรับสินค้าเข้า</button>
         </div>
-      </div>
-
-      <!-- ตารางสต็อกปัจจุบัน -->
-      <div class="table-card">
-        <div class="table-head">
-          <h3>📋 สต็อกปัจจุบัน</h3>
-          <input type="text" id="stock-table-search" placeholder="ค้นหาสินค้า..." oninput="renderStockTable()"
-            style="padding:.4rem .85rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.82rem;outline:none;width:200px">
-        </div>
-        <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th>สินค้า</th><th>หมวดหมู่</th><th>คงเหลือ</th><th>ต่ำสุด</th><th>สถานะ</th></tr></thead>
-            <tbody id="stock-tbody"></tbody>
-          </table>
+        <div style="padding:0 1.5rem 1.5rem">
+          <div style="font-size:.85rem;font-weight:700;color:var(--text2);margin-bottom:.75rem">สต็อกปัจจุบัน</div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>สินค้า</th><th>หมวดหมู่</th><th>คงเหลือ</th><th>ต่ำสุด</th><th>สถานะ</th></tr></thead>
+              <tbody id="stock-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -315,16 +261,6 @@ tr:hover td{background:#FAFCFA}
 // ใช้ localStorage เป็น database กลาง ทุกหน้าอ่าน/เขียนที่นี่
 // ใน production จะเปลี่ยนเป็น Firebase / Supabase (ฟรี)
 
-// ===== 18 หมวดหมู่หลัก =====
-const ALL_CATEGORIES = [
-  'ของใช้ในบ้าน','อาหารและเครื่องปรุง','เครื่องดื่มไม่มีแอลกอฮอล์',
-  'เครื่องดื่มมีแอลกอฮอล์','ยาสามัญประจำบ้าน','เนื้อสัตว์',
-  'ผลไม้','ผัก','ข้าวสาร','ของใช้ในครัว','ของใช้ส่วนตัว',
-  'แม่และเด็ก','ของใช้สำนักงาน','เครื่องใช้ไฟฟ้า','อาหารสัตว์',
-  'ปุ๋ย','ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์','อื่น ๆ'
-];
-const STORE_VERSION = 'v4_18cats';
-
 const KEYS = {
   PRODUCTS: 'bsg_products',
   ORDERS: 'bsg_orders',
@@ -333,55 +269,18 @@ const KEYS = {
 
 // ===== สินค้าตัวอย่าง =====
 const DEFAULT_PRODUCTS = [
-  {id:'P001',name:'น้ำยาล้างจาน',category:'ของใช้ในบ้าน',price:35,cost:22,stock:50,minStock:10,unit:'ขวด',image:'🧴',barcode:'8850101001',active:true},
-  {id:'P002',name:'ผงซักฟอก',category:'ของใช้ในบ้าน',price:55,cost:35,stock:40,minStock:10,unit:'ถุง',image:'🧺',barcode:'8850101002',active:true},
-  {id:'P003',name:'น้ำยาปรับผ้านุ่ม',category:'ของใช้ในบ้าน',price:45,cost:28,stock:30,minStock:8,unit:'ขวด',image:'🫧',barcode:'8850101003',active:true},
-  {id:'P004',name:'น้ำปลา',category:'อาหารและเครื่องปรุง',price:28,cost:16,stock:60,minStock:15,unit:'ขวด',image:'🍶',barcode:'8850102001',active:true},
-  {id:'P005',name:'น้ำมันพืช',category:'อาหารและเครื่องปรุง',price:65,cost:45,stock:40,minStock:10,unit:'ขวด',image:'🫙',barcode:'8850102002',active:true},
-  {id:'P006',name:'น้ำพริกปลาทู',category:'อาหารและเครื่องปรุง',price:45,cost:25,stock:30,minStock:5,unit:'กระปุก',image:'🌶️',barcode:'8850102003',active:true},
-  {id:'P007',name:'กะปิ',category:'อาหารและเครื่องปรุง',price:30,cost:18,stock:25,minStock:5,unit:'กระปุก',image:'🦐',barcode:'8850102004',active:true},
-  {id:'P008',name:'น้ำดื่มบรรจุขวด',category:'เครื่องดื่มไม่มีแอลกอฮอล์',price:8,cost:4,stock:120,minStock:24,unit:'ขวด',image:'💧',barcode:'8850103001',active:true},
-  {id:'P009',name:'น้ำอัดลม',category:'เครื่องดื่มไม่มีแอลกอฮอล์',price:15,cost:9,stock:72,minStock:12,unit:'กระป๋อง',image:'🥤',barcode:'8850103002',active:true},
-  {id:'P010',name:'ชาสมุนไพรรวม',category:'เครื่องดื่มไม่มีแอลกอฮอล์',price:120,cost:70,stock:22,minStock:8,unit:'กล่อง',image:'🍵',barcode:'8850103003',active:true},
-  {id:'P011',name:'เบียร์ช้าง',category:'เครื่องดื่มมีแอลกอฮอล์',price:55,cost:40,stock:48,minStock:12,unit:'กระป๋อง',image:'🍺',barcode:'8850104001',active:true},
-  {id:'P012',name:'ไวน์ข้าว',category:'เครื่องดื่มมีแอลกอฮอล์',price:150,cost:90,stock:20,minStock:5,unit:'ขวด',image:'🍷',barcode:'8850104002',active:true},
-  {id:'P013',name:'พาราเซตามอล',category:'ยาสามัญประจำบ้าน',price:25,cost:12,stock:100,minStock:20,unit:'แผง',image:'💊',barcode:'8850105001',active:true},
-  {id:'P014',name:'ยาธาตุน้ำขาว',category:'ยาสามัญประจำบ้าน',price:30,cost:18,stock:40,minStock:10,unit:'ขวด',image:'🏥',barcode:'8850105002',active:true},
-  {id:'P015',name:'ยาหม่อง',category:'ยาสามัญประจำบ้าน',price:35,cost:20,stock:30,minStock:8,unit:'กระปุก',image:'🩺',barcode:'8850105003',active:true},
-  {id:'P016',name:'หมูสด',category:'เนื้อสัตว์',price:120,cost:90,stock:20,minStock:5,unit:'กก.',image:'🥩',barcode:'8850106001',active:true},
-  {id:'P017',name:'ไก่สด',category:'เนื้อสัตว์',price:80,cost:60,stock:15,minStock:5,unit:'กก.',image:'🍗',barcode:'8850106002',active:true},
-  {id:'P018',name:'ปลาสด',category:'เนื้อสัตว์',price:90,cost:65,stock:10,minStock:3,unit:'กก.',image:'🐟',barcode:'8850106003',active:true},
-  {id:'P019',name:'กล้วยน้ำว้า',category:'ผลไม้',price:30,cost:18,stock:50,minStock:10,unit:'หวี',image:'🍌',barcode:'8850107001',active:true},
-  {id:'P020',name:'มะม่วง',category:'ผลไม้',price:50,cost:30,stock:30,minStock:8,unit:'กก.',image:'🥭',barcode:'8850107002',active:true},
-  {id:'P021',name:'ส้มเขียวหวาน',category:'ผลไม้',price:60,cost:38,stock:25,minStock:8,unit:'กก.',image:'🍊',barcode:'8850107003',active:true},
-  {id:'P022',name:'ผักบุ้ง',category:'ผัก',price:15,cost:8,stock:40,minStock:10,unit:'กก.',image:'🥬',barcode:'8850108001',active:true},
-  {id:'P023',name:'ถั่วฝักยาว',category:'ผัก',price:20,cost:12,stock:30,minStock:8,unit:'กก.',image:'🫘',barcode:'8850108002',active:true},
-  {id:'P024',name:'กะหล่ำปลี',category:'ผัก',price:18,cost:10,stock:25,minStock:8,unit:'กก.',image:'🥦',barcode:'8850108003',active:true},
-  {id:'P025',name:'ข้าวกล้องอินทรีย์',category:'ข้าวสาร',price:85,cost:55,stock:50,minStock:10,unit:'กก.',image:'🌾',barcode:'8850109001',active:true},
-  {id:'P026',name:'ข้าวหอมมะลิ',category:'ข้าวสาร',price:55,cost:38,stock:80,minStock:20,unit:'กก.',image:'🍚',barcode:'8850109002',active:true},
-  {id:'P027',name:'ข้าวเหนียว',category:'ข้าวสาร',price:45,cost:30,stock:60,minStock:15,unit:'กก.',image:'🍙',barcode:'8850109003',active:true},
-  {id:'P028',name:'กระทะอลูมิเนียม',category:'ของใช้ในครัว',price:180,cost:110,stock:15,minStock:3,unit:'ใบ',image:'🍳',barcode:'8850110001',active:true},
-  {id:'P029',name:'ช้อนส้อมสแตนเลส',category:'ของใช้ในครัว',price:25,cost:15,stock:50,minStock:10,unit:'ชิ้น',image:'🍴',barcode:'8850110002',active:true},
-  {id:'P030',name:'ถ้วยชามเมลามีน',category:'ของใช้ในครัว',price:35,cost:20,stock:30,minStock:8,unit:'ใบ',image:'🍽️',barcode:'8850110003',active:true},
-  {id:'P031',name:'แชมพู',category:'ของใช้ส่วนตัว',price:80,cost:52,stock:30,minStock:8,unit:'ขวด',image:'🧴',barcode:'8850111001',active:true},
-  {id:'P032',name:'สบู่ก้อน',category:'ของใช้ส่วนตัว',price:20,cost:12,stock:60,minStock:15,unit:'ก้อน',image:'🧼',barcode:'8850111002',active:true},
-  {id:'P033',name:'แปรงสีฟัน',category:'ของใช้ส่วนตัว',price:25,cost:14,stock:40,minStock:10,unit:'ด้าม',image:'🪥',barcode:'8850111003',active:true},
-  {id:'P034',name:'ผ้าอ้อมสำเร็จรูป',category:'แม่และเด็ก',price:180,cost:130,stock:20,minStock:5,unit:'แพ็ค',image:'👶',barcode:'8850112001',active:true},
-  {id:'P035',name:'นมผงสำหรับเด็ก',category:'แม่และเด็ก',price:350,cost:260,stock:15,minStock:5,unit:'กระป๋อง',image:'🍼',barcode:'8850112002',active:true},
-  {id:'P036',name:'กระดาษ A4',category:'ของใช้สำนักงาน',price:120,cost:85,stock:20,minStock:5,unit:'รีม',image:'📄',barcode:'8850113001',active:true},
-  {id:'P037',name:'ปากกาลูกลื่น',category:'ของใช้สำนักงาน',price:8,cost:4,stock:100,minStock:20,unit:'ด้าม',image:'🖊️',barcode:'8850113002',active:true},
-  {id:'P038',name:'หลอดไฟ LED',category:'เครื่องใช้ไฟฟ้า',price:85,cost:55,stock:20,minStock:5,unit:'หลอด',image:'💡',barcode:'8850114001',active:true},
-  {id:'P039',name:'ถ่านไฟฉาย AA',category:'เครื่องใช้ไฟฟ้า',price:30,cost:18,stock:50,minStock:10,unit:'แพ็ค',image:'🔋',barcode:'8850114002',active:true},
-  {id:'P040',name:'อาหารสุนัข',category:'อาหารสัตว์',price:120,cost:80,stock:20,minStock:5,unit:'กก.',image:'🐕',barcode:'8850115001',active:true},
-  {id:'P041',name:'อาหารแมว',category:'อาหารสัตว์',price:95,cost:62,stock:20,minStock:5,unit:'กก.',image:'🐈',barcode:'8850115002',active:true},
-  {id:'P042',name:'อาหารปลา',category:'อาหารสัตว์',price:35,cost:20,stock:30,minStock:8,unit:'ถุง',image:'🐠',barcode:'8850115003',active:true},
-  {id:'P043',name:'ปุ๋ยอินทรีย์',category:'ปุ๋ย',price:150,cost:95,stock:30,minStock:8,unit:'กก.',image:'🌱',barcode:'8850116001',active:true},
-  {id:'P044',name:'ปุ๋ยเคมี 16-16-16',category:'ปุ๋ย',price:380,cost:280,stock:20,minStock:5,unit:'กระสอบ',image:'🌿',barcode:'8850116002',active:true},
-  {id:'P045',name:'ยาฆ่าแมลง',category:'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์',price:120,cost:80,stock:15,minStock:5,unit:'ขวด',image:'🧪',barcode:'8850117001',active:true},
-  {id:'P046',name:'ยาฆ่าหญ้า',category:'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์',price:95,cost:62,stock:15,minStock:5,unit:'ขวด',image:'🌾',barcode:'8850117002',active:true},
-  {id:'P047',name:'วัคซีนสัตว์',category:'ยาหรือเคมีภัณฑ์ที่ใช้สำหรับพืชหรือสัตว์',price:200,cost:140,stock:10,minStock:3,unit:'ขวด',image:'💉',barcode:'8850117003',active:true},
-  {id:'P048',name:'ถุงพลาสติก',category:'อื่น ๆ',price:15,cost:8,stock:50,minStock:10,unit:'แพ็ค',image:'🛍️',barcode:'8850118001',active:true},
-  {id:'P049',name:'เชือกฟาง',category:'อื่น ๆ',price:25,cost:15,stock:30,minStock:8,unit:'ม้วน',image:'🪢',barcode:'8850118002',active:true},
+  { id:'P001', name:'ข้าวกล้องอินทรีย์', category:'ข้าว-ธัญพืช', price:85, cost:55, stock:50, minStock:10, unit:'กก.', image:'🌾', barcode:'8850001001', active:true },
+  { id:'P002', name:'น้ำพริกปลาทู', category:'น้ำพริก-เครื่องแกง', price:45, cost:25, stock:30, minStock:5, unit:'กระปุก', image:'🌶️', barcode:'8850001002', active:true },
+  { id:'P003', name:'กล้วยฉาบ (ต้นตำรับ)', category:'ขนม-ของฝาก', price:60, cost:35, stock:25, minStock:8, unit:'ถุง', image:'🍌', barcode:'8850001003', active:true },
+  { id:'P004', name:'น้ำผึ้งธรรมชาติ', category:'ของป่า', price:180, cost:100, stock:15, minStock:5, unit:'ขวด', image:'🍯', barcode:'8850001004', active:true },
+  { id:'P005', name:'ขนมทองม้วน', category:'ขนม-ของฝาก', price:50, cost:28, stock:40, minStock:10, unit:'กล่อง', image:'🧁', barcode:'8850001005', active:true },
+  { id:'P006', name:'ปลาส้มแผ่น', category:'อาหารแปรรูป', price:75, cost:45, stock:20, minStock:5, unit:'แพ็ค', image:'🐟', barcode:'8850001006', active:true },
+  { id:'P007', name:'ผักอินทรีย์คละ', category:'ผัก-ผลไม้', price:35, cost:18, stock:60, minStock:15, unit:'กก.', image:'🥬', barcode:'8850001007', active:true },
+  { id:'P008', name:'แยมมะม่วง', category:'แปรรูปผลไม้', price:95, cost:55, stock:18, minStock:5, unit:'ขวด', image:'🥭', barcode:'8850001008', active:true },
+  { id:'P009', name:'สบู่สมุนไพร', category:'สมุนไพร-ความงาม', price:40, cost:20, stock:35, minStock:10, unit:'ก้อน', image:'🌿', barcode:'8850001009', active:true },
+  { id:'P010', name:'ชาสมุนไพรรวม', category:'เครื่องดื่ม', price:120, cost:70, stock:22, minStock:8, unit:'กล่อง', image:'🍵', barcode:'8850001010', active:true },
+  { id:'P011', name:'หมูแดดเดียว', category:'อาหารแปรรูป', price:130, cost:80, stock:12, minStock:5, unit:'แพ็ค', image:'🥩', barcode:'8850001011', active:true },
+  { id:'P012', name:'น้ำมันมะพร้าว', category:'น้ำมัน-เครื่องปรุง', price:160, cost:95, stock:8, minStock:5, unit:'ขวด', image:'🥥', barcode:'8850001012', active:true },
 ];
 
 const DEFAULT_SETTINGS = {
@@ -395,10 +294,8 @@ const DEFAULT_SETTINGS = {
 
 // ===== INIT =====
 function initStore() {
-  // force reset เมื่อมีการอัปเดต version (เพิ่มหมวดหมู่ใหม่)
-  if (localStorage.getItem('bsg_version') !== STORE_VERSION) {
+  if (!localStorage.getItem(KEYS.PRODUCTS)) {
     localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(DEFAULT_PRODUCTS));
-    localStorage.setItem('bsg_version', STORE_VERSION);
   }
   if (!localStorage.getItem(KEYS.ORDERS)) {
     localStorage.setItem(KEYS.ORDERS, JSON.stringify([]));
@@ -498,8 +395,8 @@ function saveSettings(s) {
 
 // ===== CATEGORIES =====
 function getCategories() {
-  const fromProds = getProducts().map(p => p.category);
-  return [...new Set([...ALL_CATEGORIES, ...fromProds])];
+  const cats = [...new Set(getProducts().map(p => p.category))];
+  return cats;
 }
 
 // ===== STATS =====
@@ -600,8 +497,9 @@ function renderProductTable() {
         : '<span class="badge badge-green">มีสินค้า</span>'}
       </td>
       <td style="display:flex;gap:.5rem">
-        <button class="btn btn-outline btn-sm" onclick="openEditProduct('${p.id}')">แก้ไข</button>
-        <button class="btn btn-outline btn-sm" style="color:var(--red)" onclick="doDeleteProduct('${p.id}')">${p.active ? 'ปิด' : 'เปิด'}</button>
+        <button class="btn btn-outline btn-sm" onclick="openEditProduct('${p.id}')">✏️ แก้ไข</button>
+        <button class="btn btn-outline btn-sm" style="color:var(--amber,#E65100);border-color:var(--amber,#E65100)" onclick="doToggleProduct('${p.id}')">${p.active ? '🔕 ปิด' : '✅ เปิด'}</button>
+        <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:var(--red)" onclick="doRemoveProduct('${p.id}')">🗑️ ลบ</button>
       </td>
     </tr>`;
   }).join('');
@@ -658,16 +556,57 @@ function saveProduct() {
   renderProductTable();
   renderOverview();
 }
-function doDeleteProduct(id) {
+// ปิด/เปิดการขาย (ซ่อนชั่วคราว)
+function doToggleProduct(id) {
   const p = getProduct(id);
   if (!p) return;
-  if (!confirm(`${p.active ? 'ปิดการขาย' : 'เปิดการขาย'} "${p.name}"?`)) return;
+  const action = p.active ? 'ปิดการขาย' : 'เปิดการขาย';
+  if (!confirm(action + ' "' + p.name + '"?')) return;
   const all = getProducts();
   const idx = all.findIndex(x => x.id === id);
   all[idx].active = !all[idx].active;
   saveProducts(all);
   renderProductTable();
   renderOverview();
+}
+
+// ลบถาวรออกจากระบบ
+function doRemoveProduct(id) {
+  const p = getProduct(id);
+  if (!p) return;
+  if (!confirm(
+    '🗑️ ลบ "' + p.name + '" ออกจากระบบถาวร?
+
+' +
+    '⚠️ ข้อมูลจะหายไปและไม่สามารถกู้คืนได้'
+  )) return;
+  // แสดง confirm ซ้ำเพื่อป้องกันกดพลาด
+  if (!confirm('ยืนยันอีกครั้ง: ลบ "' + p.name + '" ถาวร?')) return;
+  const all = getProducts().filter(x => x.id !== id);
+  saveProducts(all);
+  // refresh category dropdown
+  const sel = document.getElementById('p-cat');
+  if (sel) { while(sel.options.length > 1) sel.remove(1); }
+  renderProductTable();
+  renderOverview();
+  showDeleteToast('🗑️ ลบ "' + p.name + '" ออกจากระบบแล้ว');
+}
+
+function showDeleteToast(msg) {
+  let t = document.getElementById('del-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'del-toast';
+    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);'
+      + 'background:#C62828;color:white;padding:.85rem 1.75rem;border-radius:12px;'
+      + 'font-weight:700;font-size:.9rem;z-index:999;'
+      + 'box-shadow:0 4px 20px rgba(0,0,0,.25);transition:opacity .3s;font-family:'Sarabun',sans-serif';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.style.opacity='0'; }, 3000);
 }
 
 // ORDERS
@@ -708,57 +647,10 @@ function renderOrders() {
 
 // STOCK PAGE
 function renderStockPage() {
-  // populate หมวดหมู่ dropdown
-  const catSel = document.getElementById('stock-cat');
-  const savedCat = catSel.value;
-  catSel.innerHTML = '<option value="">-- ทุกหมวดหมู่ --</option>' +
-    ALL_CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-  catSel.value = savedCat;
-  filterStockProducts();
-  renderStockTable();
-}
-
-function filterStockProducts() {
-  const cat = document.getElementById('stock-cat').value;
-  const q = (document.getElementById('stock-search').value || '').toLowerCase();
-  let prods = getProducts(true);
-  if (cat) prods = prods.filter(p => p.category === cat);
-  if (q) prods = prods.filter(p => p.name.toLowerCase().includes(q));
+  const prods = getProducts(true);
   const sel = document.getElementById('stock-product');
-  const prevVal = sel.value;
-  sel.innerHTML = prods.length
-    ? prods.map(p => {
-        const low = p.stock <= p.minStock && p.stock > 0;
-        const out = p.stock <= 0;
-        const flag = out ? ' ❌' : low ? ' ⚠️' : '';
-        return `<option value="${p.id}">${p.image} ${p.name}${flag}  (เหลือ: ${p.stock} ${p.unit})  |  ${p.category}</option>`;
-      }).join('')
-    : '<option value="">-- ไม่พบสินค้า --</option>';
-  // คืนค่าที่เลือกไว้ถ้ายังอยู่ใน list
-  if (prevVal && prods.find(p => p.id === prevVal)) sel.value = prevVal;
-  else if (prods.length) sel.value = prods[0].id;
-  updateStockPreview();
-}
-
-function updateStockPreview() {
-  const id = document.getElementById('stock-product').value;
-  const p = id ? getProduct(id) : null;
-  const box = document.getElementById('stock-preview');
-  if (!p) { box.style.display = 'none'; return; }
-  box.style.display = 'block';
-  document.getElementById('prev-name').textContent = p.image + ' ' + p.name;
-  document.getElementById('prev-cat').textContent = p.category;
-  const stockEl = document.getElementById('prev-stock');
-  stockEl.textContent = p.stock + ' ' + p.unit;
-  stockEl.style.color = p.stock <= 0 ? 'var(--red)' : p.stock <= p.minStock ? 'var(--amber)' : 'var(--green)';
-  document.getElementById('prev-min').textContent = p.minStock + ' ' + p.unit;
-}
-
-function renderStockTable() {
-  const q = (document.getElementById('stock-table-search')?.value || '').toLowerCase();
-  let prods = getProducts();
-  if (q) prods = prods.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
-  document.getElementById('stock-tbody').innerHTML = prods.map(p => {
+  sel.innerHTML = prods.map(p => `<option value="${p.id}">${p.image} ${p.name} (เหลือ: ${p.stock} ${p.unit})</option>`).join('');
+  document.getElementById('stock-tbody').innerHTML = getProducts().map(p => {
     const low = p.stock <= p.minStock;
     return `<tr>
       <td>${p.image} <strong>${p.name}</strong></td>
@@ -769,35 +661,15 @@ function renderStockTable() {
     </tr>`;
   }).join('');
 }
-
 function doAddStock() {
   const id = document.getElementById('stock-product').value;
   const qty = parseInt(document.getElementById('stock-qty').value) || 0;
-  const note = document.getElementById('stock-note').value || '';
-  if (!id) { alert('กรุณาเลือกสินค้า'); return; }
-  if (!qty || qty < 1) { alert('กรุณาระบุจำนวนที่รับเข้า'); return; }
-  const p = getProduct(id);
+  if (!qty || qty < 1) { alert('กรุณาระบุจำนวน'); return; }
   addStock(id, qty);
-  // แสดง toast แทน alert
-  showStockToast(`✅ รับเข้า ${p.image} ${p.name} จำนวน ${qty} ${p.unit} สำเร็จ`);
+  alert('✅ บันทึกรับสินค้าเข้าแล้ว');
   document.getElementById('stock-qty').value = 1;
-  document.getElementById('stock-note').value = '';
   renderStockPage();
   renderOverview();
-}
-
-function showStockToast(msg) {
-  let t = document.getElementById('stock-toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'stock-toast';
-    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:.85rem 1.75rem;border-radius:var(--r);font-weight:700;font-size:.9rem;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:opacity .3s';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.style.opacity = '0', 2800);
 }
 
 // LOW STOCK
@@ -836,17 +708,6 @@ function saveSettingsUI() {
   const ok = document.getElementById('s-ok');
   ok.style.display = 'block';
   setTimeout(() => ok.style.display = 'none', 2000);
-}
-
-function forceResetProducts() {
-  if (!confirm('รีเซ็ตสินค้าตัวอย่าง 49 รายการ ครบ 18 หมวด?\n\n⚠️ สินค้าที่เพิ่มเองจะหายไป')) return;
-  localStorage.removeItem('bsg_products');
-  localStorage.removeItem('bsg_version');
-  localStorage.setItem('bsg_products', JSON.stringify(DEFAULT_PRODUCTS));
-  localStorage.setItem('bsg_version', STORE_VERSION);
-  window.dispatchEvent(new CustomEvent('stockUpdated'));
-  renderProductTable(); renderOverview();
-  alert('✅ รีเซ็ตสำเร็จ! สินค้า 49 รายการ ครบ 18 หมวด');
 }
 
 // INIT
