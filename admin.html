@@ -574,12 +574,7 @@ function doToggleProduct(id) {
 function doRemoveProduct(id) {
   const p = getProduct(id);
   if (!p) return;
-  if (!confirm(
-    '🗑️ ลบ "' + p.name + '" ออกจากระบบถาวร?
-
-' +
-    '⚠️ ข้อมูลจะหายไปและไม่สามารถกู้คืนได้'
-  )) return;
+  if (!confirm('🗑️ ลบ "' + p.name + '" ออกจากระบบถาวร?\n\n⚠️ ข้อมูลจะหายไปและไม่สามารถกู้คืนได้')) return;
   // แสดง confirm ซ้ำเพื่อป้องกันกดพลาด
   if (!confirm('ยืนยันอีกครั้ง: ลบ "' + p.name + '" ถาวร?')) return;
   const all = getProducts().filter(x => x.id !== id);
